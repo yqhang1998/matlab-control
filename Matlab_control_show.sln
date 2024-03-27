@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.34526.175
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Matlab_control_show", "Matlab_control_show\Matlab_control_show.vcxproj", "{9511FC4C-D876-4373-BAF7-9CD2E3697E80}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9511FC4C-D876-4373-BAF7-9CD2E3697E80}.Debug|x64.ActiveCfg = Release|x64
+		{9511FC4C-D876-4373-BAF7-9CD2E3697E80}.Debug|x64.Build.0 = Release|x64
+		{9511FC4C-D876-4373-BAF7-9CD2E3697E80}.Release|x64.ActiveCfg = Release|x64
+		{9511FC4C-D876-4373-BAF7-9CD2E3697E80}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FD171633-277C-4319-939A-4D3517D71464}
+	EndGlobalSection
+EndGlobal
