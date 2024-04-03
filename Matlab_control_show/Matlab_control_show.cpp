@@ -6,7 +6,8 @@ Matlab_control_show::Matlab_control_show(QWidget *parent)
 	ui.setupUi(this);
 	// 配置 VTK 的初始设置，这个函数用来显示stl模型
 	initVTK();
-
+	//创建服务器对象
+	server = new QTcpServer();
 
 	//绘图曲线部分
 	m_timer = new QTimer(this);
@@ -16,6 +17,7 @@ Matlab_control_show::Matlab_control_show(QWidget *parent)
 
 	QObject::connect(ui.btnClear, SIGNAL(clicked(bool)), this, SLOT(slotBtnClear()));
 	QObject::connect(ui.btnStartAndStop, SIGNAL(clicked(bool)), this, SLOT(slotBtnStartAndStop()));
+
 	//
 	// 创建横纵坐标轴并设置显示范围
 	//
@@ -30,36 +32,98 @@ Matlab_control_show::Matlab_control_show(QWidget *parent)
 
 
 	m_lineSeries = new QLineSeries();                             // 创建曲线绘制对象
+	m_b_start = new QLineSeries;
+	m_b_end = new QLineSeries;
+	m_c_start = new QLineSeries;
+	m_c_end = new QLineSeries;
+
 	m_lineSeries->setPointsVisible(true);                         // 设置数据点可见
+	m_b_start->setPointsVisible(true);
+	m_b_end->setPointsVisible(true);
+	m_c_start->setPointsVisible(true);
+	m_c_end->setPointsVisible(true);
+
 	m_lineSeries->setName("curve");                            // 图例名称
+	m_b_start->setName("b-scan range");
+	m_c_start->setName("c-scan range");
 	//下面是对曲线属性进行设置
 	// 设置QPen，定义线条的属性
-	QPen pen;
+	QPen pen,pen1,pen2;
 	pen.setWidth(0.7); // 设置线条宽度为2像素
+	pen1.setWidth(0.7);
+	pen2.setWidth(0.7);
 	// 还可以设置其他的QPen属性，例如颜色
 	pen.setColor(Qt::red); // 设置线条颜色为红色
+	pen1.setColor(Qt::black);
+	pen2.setColor(Qt::blue);
 	// 将QPen应用于QLineSeries对象
 	m_lineSeries->setPen(pen);
+	m_b_start->setPen(pen1);
+	m_b_end->setPen(pen1);
+	m_c_start->setPen(pen2);
+	m_c_end->setPen(pen2);
+
 
 
 	m_chart = new QChart();                                        // 创建图表对象
 	m_chart->addAxis(m_axisY, Qt::AlignLeft);                      // 将X轴添加到图表上
 	m_chart->addAxis(m_axisX, Qt::AlignBottom);                    // 将Y轴添加到图表上
+
 	m_chart->addSeries(m_lineSeries);                              // 将曲线对象添加到图表上
+	m_chart->addSeries(m_b_start);
+	m_chart->addSeries(m_b_end);
+	m_chart->addSeries(m_c_start);
+	m_chart->addSeries(m_c_end);
+
 	m_chart->setAnimationOptions(QChart::SeriesAnimations);        // 动画：能使曲线绘制显示的更平滑，过渡效果更好看
+
+
 
 	m_lineSeries->attachAxis(m_axisX);                             // 曲线对象关联上X轴，此步骤必须在m_chart->addSeries之后
 	m_lineSeries->attachAxis(m_axisY);                             // 曲线对象关联上Y轴，此步骤必须在m_chart->addSeries之后
 
+	m_b_start->attachAxis(m_axisX);                             // 曲线对象关联上X轴，此步骤必须在m_chart->addSeries之后
+	m_b_start->attachAxis(m_axisY);                             // 曲线对象关联上Y轴，此步骤必须在m_chart->addSeries之后
+
+	m_b_end->attachAxis(m_axisX);                             // 曲线对象关联上X轴，此步骤必须在m_chart->addSeries之后
+	m_b_end->attachAxis(m_axisY);                             // 曲线对象关联上Y轴，此步骤必须在m_chart->addSeries之后
+
+	m_c_start->attachAxis(m_axisX);                             // 曲线对象关联上X轴，此步骤必须在m_chart->addSeries之后
+	m_c_start->attachAxis(m_axisY);                             // 曲线对象关联上Y轴，此步骤必须在m_chart->addSeries之后
+
+	m_c_end->attachAxis(m_axisX);                             // 曲线对象关联上X轴，此步骤必须在m_chart->addSeries之后
+	m_c_end->attachAxis(m_axisY);                             // 曲线对象关联上Y轴，此步骤必须在m_chart->addSeries之后
+
 	ui.graphicsView->setChart(m_chart);                           // 将图表对象设置到graphicsView上进行显示
 	ui.graphicsView->setRenderHint(QPainter::Antialiasing);       // 设置渲染：抗锯齿，如果不设置那么曲线就显得不平滑
 
+	//隐藏部分图例
+	m_chart->legend()->markers(m_b_end)[0]->setVisible(false);
+	m_chart->legend()->markers(m_c_end)[0]->setVisible(false);
+	//
+	ui.label->installEventFilter(this);//b_scan
+	ui.label_2->installEventFilter(this);//c_scan
 
 
+	
+	
+
+	//控制绘图与否
+	drawImage = false;
+	//image1 = QImage(rows_c, cols_c, QImage::Format_RGB32);   
+	image1 = QImage(rows_c, cols_c, QImage::Format_ARGB32);
+	image1.fill(QColor(Qt::transparent));  //这行代码会将图像设置为透明
 }
 
 Matlab_control_show::~Matlab_control_show()
-{}
+{
+	if (server != nullptr)
+	{
+		delete server;
+		server = nullptr;
+	}
+	socket = nullptr;
+}
 
 void Matlab_control_show::initVTK()
 {
@@ -93,9 +157,7 @@ void Matlab_control_show::initVTK()
 	ui.qvtkWidget->GetRenderWindow()->Render();
 }
 
-
-
-void Matlab_control_show::on_pushButtonSelect_clicked() {
+void Matlab_control_show::pushButtonSelect_clicked() {
 	ui.textBrowser->insertPlainText("Select button clicked!\n");
 
 	PointPickedSignal* signal = new PointPickedSignal(this);
@@ -117,7 +179,7 @@ void Matlab_control_show::onPointPicked(double* pos) {
 	actor->SetOrigin(pos);
 }
 
-void Matlab_control_show::on_pushButtonSelDone_clicked() {
+void Matlab_control_show::pushButtonSelDone_clicked() {
 	ui.textBrowser->insertPlainText("Selection done, restore the default interactor style.\n");
 
 	// 移除左键按下事件的观察者
@@ -133,10 +195,12 @@ void Matlab_control_show::on_pushButtonSelDone_clicked() {
 void Matlab_control_show::slotBtnClear()
 {
 	m_lineSeries->clear();
+	clearLabel();
 }
 
 void Matlab_control_show::slotBtnStartAndStop()
 {
+
 	if (m_timer->isActive())
 	{
 		m_timer->stop();
@@ -145,7 +209,7 @@ void Matlab_control_show::slotBtnStartAndStop()
 	else
 	{
 		num = 0;
-		m_timer->start(200);
+		m_timer->start(20);
 		ui.btnStartAndStop->setText("停止定时器");
 	}
 }
@@ -183,17 +247,46 @@ void Matlab_control_show::slotTimeout()
 				}
 		}
 
-
-
-
-
-		//
-		file.close();
-		// 如果需要确保读取了1000个数据
-		if (data1.size() != 1000)
+		////c_scan数据处理
+		slice_vector = data1.mid(c_scan_start-1, c_scan_end-c_scan_start+2);
+		a = (num - 1) / 31;
+		b = (num - 1) % 31;
+		if (a % 2 == 0)
 		{
-			qDebug() << "Warning: The number of read data entries is not equal to 1000.";
+			c_scan[b] = differenceMinMax(slice_vector);
+			//qDebug()<<a<<" r"<<b<<" c "<<differenceMinMax(slice_vector);
 		}
+		else
+		{
+			c_scan[30 - b] = differenceMinMax(slice_vector);
+			//qDebug()<<a<<" r"<<(30-b)<<" c "<<differenceMinMax(slice_vector);
+		}
+
+		////到此结束c_scan
+
+		//B-SCAN  存储的格式为31行，263列，每一行都是每一个data1数据中存一部分进去
+		for (int i = b_scan_start; i <= b_scan_end; ++i)
+		{
+			// 将每一个文件中的144-406范围内的数据加入b_scan，并且进行处理
+			b_scan[b][i - b_scan_start] = data1[i];
+		}
+
+		//b_scan  下面的应该在读取了31个文件后处理
+		if (a != 0 && b == 0)
+		{
+			datacalculate(b_scan);
+			//qDebug()<<"b_scan data ok\n";
+			//b_scan.clear(); 用了这个之后b_scan会变0，访问会出错
+			//c_scan数据处理
+
+			normalize(c_scan);
+			drawImage = true;
+			ui.label->update();
+			// std::cout<<num<<std::endl;
+			ui.label_2->update();
+		}
+		
+		file.close();
 		// 在添加新数据之前，清除旧的数据点
 		m_lineSeries->clear();
 
@@ -202,6 +295,269 @@ void Matlab_control_show::slotTimeout()
 			m_lineSeries->append(QPointF((double)i, data1[i]));
 		}
 	}
+	data1.clear();
 	num++;
 }
 
+
+void Matlab_control_show::clearLabel()
+{
+	drawImage = false;  // 设置不绘制图像
+	ui.label->update();   // 触发重绘，eventFilter会拦截到paint事件
+	ui.label_2->update();
+}
+//过滤器
+bool Matlab_control_show::eventFilter(QObject *watched, QEvent *event)
+{
+	//画b_scan
+	if (watched == ui.label && event->type() == QEvent::Paint && drawImage)
+	{
+		upPaint();
+		return true;
+	}
+	//画c_scan
+	if (watched == ui.label_2 && event->type() == QEvent::Paint && drawImage)
+	{
+		upPaint1();
+		return true;
+	}
+	return QWidget::eventFilter(watched, event);
+}
+
+
+void Matlab_control_show::upPaint()
+{
+	QPainter painter(ui.label);
+	QImage image(rows, cols, QImage::Format_Grayscale8); // 竖直显示
+	// 将图片数据填充为数组数据
+	for (int i = 0; i < rows; ++i) {
+		for (int j = 0; j < cols; ++j)
+		{
+			image.setPixelColor(i, j, qRgb(b_scan[i][j], b_scan[i][j], b_scan[i][j])); // 水平显示
+		}
+	}
+	//将整个显示充满label中
+	scaledImage = image.scaled(ui.label->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+	painter.drawImage(0, 0, scaledImage); // 在（0，0）位置处绘制图像
+}
+
+void Matlab_control_show::upPaint1()
+{
+	QPainter painter(ui.label_2);
+	for (int i = 0; i < 31; ++i)
+	{
+		QColor color = valueToColor(c_scan[i]);
+		image1.setPixelColor(i, a-1, color);
+	}
+	//将整个显示充满label中
+	scaledImage = image1.scaled(ui.label_2->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+	painter.drawImage(0, 0, scaledImage); // 在（0，0）位置处绘制图像
+
+}
+
+
+
+//b_scan数据进行处理
+void Matlab_control_show::datacalculate(QVector<QVector<double>>& b_scan)
+{
+	int rows = b_scan.size(); // b_scan 的行数
+	int cols = b_scan.first().size(); // b_scan 的列数，假设所有行长度都相同
+
+	// 初始化为最大可能值和最小可能值
+	double minVal = std::numeric_limits<double>::max();
+	double maxVal = std::numeric_limits<double>::lowest();
+
+	// 遍历 b_scan 中的每个元素找到最小值和最大值
+	for (const QVector<double>& vec : b_scan) {
+		for (double val : vec) {
+			if (val < minVal) {
+				minVal = val;
+			}
+			if (val > maxVal) {
+				maxVal = val;
+			}
+		}
+	}
+
+	for (int r = 0; r < rows; ++r) {
+		for (int c = 0; c < cols; ++c) {
+			double normalizedValue = (b_scan[r][c] - minVal) / (maxVal - minVal); // 归一化到 [0.0, 1.0]
+			b_scan[r][c] = static_cast<uchar>(normalizedValue * 255.0); // 映射到 [0, 255]
+		}
+	}
+}
+
+double Matlab_control_show::differenceMinMax(QVector<double> vec)
+{
+	auto it_max = std::max_element(vec.begin(), vec.end());
+	auto it_min = std::min_element(vec.begin(), vec.end());
+	return *it_max - *it_min;
+}
+
+QVector<double> Matlab_control_show::normalize(QVector<double>& vec) {
+	double minVal = 0.126; //*std::min_element(vec.begin(), vec.end());
+	double maxVal = 0.51;//*std::max_element(vec.begin(), vec.end());
+
+	for (double &val : vec) {
+		val = (val - minVal) / (maxVal - minVal);
+	}
+
+	return vec;
+}
+
+QColor Matlab_control_show::valueToColor(float value) {
+
+	QColor color;
+	color.setHsvF(2.0 / 3.0 - value * 2.0 / 3.0, 1.0, 1.0, 1.0);
+	return color;
+}
+
+void Matlab_control_show::pushButton_clicked()
+{
+	//ur_tcp
+	//server_ = new QTcpSocket(this);
+	//IP_ = ui.lineEdit->text();
+	//port_ = ui.lineEdit_2->text();
+	//unsigned short port = port_.toUShort();  //注意传入的port的类型
+	//server_->abort();//取消已有连接，重置套接字
+	//server_->connectToHost(QHostAddress(IP_), port);  //注意传入IP的类型
+	//if (!server_->waitForConnected(100))  //建立连接，连接尝试时间为1000ms
+	//{
+	//	QMessageBox::warning(this, "error", "connect false!!");
+	//	return;
+	//}
+
+	//获取UI界面的端口号
+	quint16 port = ui.lineEdit_2->text().toUInt();
+	//将服务器设置为被动监听状态
+	//bool QTcpServer::listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 0)
+	//参数1：要监听的主机地址，如果是any，表示监听所有主机地址，也可以给特定的主机地址进行监听
+	//参数2：通过指定的端口号进行访问服务器，如果是0，表示由服务器自动分配。如果非0，则表示指定端口号
+	//返回值：成功返回真，失败返回假
+	if (!server->listen(QHostAddress::Any, port))
+	{
+		QMessageBox::critical(this, "失败", "服务器启动失败");
+	}
+	else {
+		QMessageBox::information(this, "成功", "服务器启动成功");
+	}
+
+	//执行到这表明服务器启动成功，并对客户端连接进行监听，如果有客户端向服务器发来连接请求，那么该服务器就会自动发射一个newConnection信号
+	//我们可以将信号连接到对应的槽函数中处理相关逻辑
+	connect(server, &QTcpServer::newConnection, this, &Matlab_control_show::newConnection_slot);
+}
+
+void Matlab_control_show::newConnection_slot()
+{
+	qDebug() << "有客户端申请连接";
+
+	//获取最新连接的客户端套接字
+	//[virtual] QTcpSocket *QTcpServer::nextPendingConnection()
+	QTcpSocket *s = server->nextPendingConnection();
+
+	//将获取的套接字存放到客户端容器中
+	clientList.push_back(s);
+
+	//此时，客户端就和服务器建立起来联系了
+	//如果客户端有数据向服务器发送过来，那么该套接字就会自动发送一个readyread信号
+	//我们可以将该信号连接到自定义的槽函数中处理相关逻辑
+	connect(s, &QTcpSocket::readyRead, this, &Matlab_control_show::readyRead_slot);
+}
+
+//关于readyRead信号对应槽函数的实现
+void Matlab_control_show::readyRead_slot()
+{
+	//删除客户端链表中的无效客户端套接字
+	for (int i = 0; i < clientList.count(); i++)
+	{
+		//判断套接字的状态
+		//函数原型     SocketState state() const;
+		//功能：返回客户端状态
+		//返回值：客户端状态，如果是0，表示无连接
+		if (clientList[i]->state() == 0)
+		{
+			clientList.removeAt(i);     //将下标为i的客户端移除
+		}
+	}
+
+	//遍历所有客户端，查看是哪个客户端发来数据
+	for (int i = 0; i < clientList.count(); i++)
+	{
+		//函数原型：qint64 bytesAvailable() const override;
+		//功能：返回当前客户端套接字中的可读数据字节个数
+		//返回值：当前客户端待读的字节数，如果该数据0，表示无待读数据
+		if (clientList[i]->bytesAvailable() != 0)
+		{
+			//读取当前客户端的相关数据
+			//函数原型：QByteArray readAll();
+			//功能：读取当前套接字中的所有数据，并返回一个字节数组
+			//返回值：数据的字节数组
+			QByteArray msg = clientList[i]->readAll();
+
+			//将数据战术到ui界面上
+			ui.listWidget->addItem(QString::fromLocal8Bit(msg));
+
+			//将接收到的该消息，发送给所有客户端
+			for (int j = 0; j < clientList.count(); j++)
+			{
+				clientList[j]->write(msg);
+			}
+		}
+	}
+
+}
+
+void Matlab_control_show::pushButton_2_clicked()
+{
+	//server_->close();
+}
+
+
+
+void Matlab_control_show::pushButtonConfig_clicked()
+{
+	//b_scan
+	rows = 31;
+	b_scan_end = ui.lineEdit_4->text().toInt();
+	b_scan_start = ui.lineEdit_3->text().toInt();
+	cols = b_scan_end - b_scan_start+1;
+	b_scan = QVector<QVector<double>>(rows, QVector<double>(cols));
+
+	//c_scan
+	c_scan_start = ui.lineEdit_5->text().toInt();
+	c_scan_end = ui.lineEdit_6->text().toInt();
+	//end
+	c_scan = QVector<double>(31);
+
+	if (m_b_start->count() != 0) {
+		m_b_start->clear();
+	}
+	for (int i = -10; i <= 2000; ++i)
+	{
+		m_b_start->append(b_scan_start, i);
+	}
+
+	if (m_b_end->count() != 0) {
+		m_b_end->clear();
+	}
+	for (int i = -10; i <= 2000; ++i)
+	{
+		m_b_end->append(b_scan_end, i);
+	}
+
+	if (m_c_start->count() != 0) {
+		m_c_start->clear();
+	}
+	for (int i = -10; i <= 2000; ++i)
+	{
+		m_c_start->append(c_scan_start, i);
+	}
+
+	if (m_c_end->count() != 0) {
+		m_c_end->clear();
+	}
+	for (int i = -10; i <= 2000; ++i)
+	{
+		m_c_end->append(c_scan_end, i);
+	}
+}
