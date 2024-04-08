@@ -58,6 +58,11 @@ QT_CHARTS_USE_NAMESPACE
 #include <QMessageBox>
 #include <QAbstractSocket>
 #include <QTcpServer>
+#include <vector>
+#include <iostream>
+#define _USE_MATH_DEFINES 
+
+
 class Matlab_control_show : public QMainWindow
 {
 	Q_OBJECT
@@ -159,6 +164,13 @@ private:
 	QList<QTcpSocket *> clientList;
 
 //
+	//生成点的函数
+	bool isEven(int num);
+	std::vector<std::vector<double>> Fcn_plane_xyzrpy(int count1, int count2, double x_step, double y_step, double x_start, double y_start, double z);
+	int x_num, y_num, x_start, y_start, x_step, y_step, z_start;
+	std::vector<std::vector<double>> points;
+
+
 private slots:
 	void slotBtnClear();
 	void slotBtnStartAndStop();

@@ -14,8 +14,9 @@ Matlab_control_show::Matlab_control_show(QWidget *parent)
 	m_timer->setSingleShot(false);
 	m_timer->setInterval(50);
 	QObject::connect(m_timer, SIGNAL(timeout()), this, SLOT(slotTimeout()));
-
+	//清除曲线
 	QObject::connect(ui.btnClear, SIGNAL(clicked(bool)), this, SLOT(slotBtnClear()));
+	//启动定时器
 	QObject::connect(ui.btnStartAndStop, SIGNAL(clicked(bool)), this, SLOT(slotBtnStartAndStop()));
 
 	//
@@ -414,19 +415,6 @@ QColor Matlab_control_show::valueToColor(float value) {
 
 void Matlab_control_show::pushButton_clicked()
 {
-	//ur_tcp
-	//server_ = new QTcpSocket(this);
-	//IP_ = ui.lineEdit->text();
-	//port_ = ui.lineEdit_2->text();
-	//unsigned short port = port_.toUShort();  //注意传入的port的类型
-	//server_->abort();//取消已有连接，重置套接字
-	//server_->connectToHost(QHostAddress(IP_), port);  //注意传入IP的类型
-	//if (!server_->waitForConnected(100))  //建立连接，连接尝试时间为1000ms
-	//{
-	//	QMessageBox::warning(this, "error", "connect false!!");
-	//	return;
-	//}
-
 	//获取UI界面的端口号
 	quint16 port = ui.lineEdit_2->text().toUInt();
 	//将服务器设置为被动监听状态
@@ -513,7 +501,7 @@ void Matlab_control_show::pushButton_2_clicked()
 }
 
 
-
+//参数配置
 void Matlab_control_show::pushButtonConfig_clicked()
 {
 	//b_scan
@@ -560,4 +548,50 @@ void Matlab_control_show::pushButtonConfig_clicked()
 	{
 		m_c_end->append(c_scan_end, i);
 	}
+
+	//x起始坐标y起始坐标z坐标以及对应步距的获取
+	//x方向采集数量
+	x_num = ui.lineEdit_7->text().toInt();
+	//y方向采集数量
+	y_num = ui.lineEdit_8->text().toInt();
+	//x方向步距    
+	x_step = ui.lineEdit_8->text().toInt();
+	//y方向步距
+	y_step = ui.lineEdit_8->text().toInt();
+	//起点坐标x
+	x_start = ui.lineEdit_8->text().toInt();
+	//起点坐标y
+	y_start = ui.lineEdit_8->text().toInt();
+	//起点坐标z
+	z_start = ui.lineEdit_8->text().toInt();
+	//config按下之后生成坐标
+	points=Fcn_plane_xyzrpy(x_num, y_num, x_step, y_step, x_start, y_start, z_start);
+}
+
+//生成点的函数
+bool Matlab_control_show::isEven(int num) {
+	return num % 2 == 0;
+}
+std::vector<std::vector<double>> Matlab_control_show::Fcn_plane_xyzrpy(int count1, int count2, double x_step, double y_step, double x_start, double y_start, double z) {
+	std::vector<std::vector<double>> points;
+
+	for (int j = 0; j <= count1; ++j) {
+		for (int i = 0; i <= count2; ++i) {
+			double x;
+			if (isEven(j)) {
+				x = x_start - i * x_step;
+			}
+			else {
+				x = x_start - (count1 - i) * x_step;
+			}
+			double y = y_start - j * y_step;
+			double rx = M_PI;
+			double ry = 0;
+			double rz = 0;
+
+			std::vector<double> point = { x, y, z, rx, ry, rz };
+			points.push_back(point);
+		}
+	}
+	return points;
 }
