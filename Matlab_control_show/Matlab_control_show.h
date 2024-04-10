@@ -12,6 +12,7 @@ QT_CHARTS_USE_NAMESPACE
 //#include <vtkActor.h>
 //#include <vtkRenderer.h>
 //#include <vtkRenderWindow.h>
+#include <vtkLine.h>
 #include <vtkVertexGlyphFilter.h>
 #include <vtkProperty.h>
 #include <vtkPolyLine.h>
@@ -175,7 +176,8 @@ private:
 	std::vector<std::vector<double>> points;
 	//画点
 	void drawPoint(double x, double y, double z, vtkSmartPointer<vtkRenderer> renderer);
-
+	//点连成线函数
+	void point2line(double x1, double y1, double z1, double x2, double y2, double z2, vtkSmartPointer<vtkRenderer> renderer);
 
 private slots:
 	void slotBtnClear();

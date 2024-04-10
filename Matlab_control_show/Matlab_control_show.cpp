@@ -294,6 +294,10 @@ void Matlab_control_show::slotTimeout()
 		}
 	}
 	data1.clear();
+	//更新扫描轨迹
+	point2line(points[num][0], points[num][1], points[num][2], points[num+1][0], points[num+1][1], points[num+1][2], renderer);
+	ui.qvtkWidget->GetRenderWindow()->Render();
+	//更换文件
 	num++;
 }
 
@@ -344,6 +348,10 @@ void Matlab_control_show::upPaint1()
 	QPainter painter(ui.label_2);
 	for (int i = 0; i < 31; ++i)
 	{
+		//if (c_scan[i] > 0.8)
+		//{
+		//	drawPoint(points[i][0],points[i][1],z_start,renderer);
+		//}
 		QColor color = valueToColor(c_scan[i]);
 		image1.setPixelColor(i, a-1, color);
 	}
@@ -377,7 +385,6 @@ void Matlab_control_show::datacalculate(QVector<QVector<double>>& b_scan)
 			}
 		}
 	}
-
 	for (int r = 0; r < rows; ++r) {
 		for (int c = 0; c < cols; ++c) {
 			double normalizedValue = (b_scan[r][c] - minVal) / (maxVal - minVal); // 归一化到 [0.0, 1.0]
@@ -578,7 +585,7 @@ std::vector<std::vector<double>> Matlab_control_show::Fcn_plane_xyzrpy(int count
 	return points;
 }
 
-//划线
+//路径生成函数
 void Matlab_control_show::drawline()
 {
 
@@ -605,7 +612,6 @@ void Matlab_control_show::drawline()
 	//std::cout << x_num << " " << y_num << " " << x_step << " " << y_step << " " << x_start << " " << y_start << " " << z_start << std::endl;
 	//计算出来的坐标点
 	points = Fcn_plane_xyzrpy(x_num, y_num, x_step, y_step, x_start, y_start, z_start);
-	//points = Fcn_plane_xyzrpy(30, 30, 0.1, 0.1, 20, 20, 10);
 	vtkSmartPointer<vtkPoints> vpoints = vtkSmartPointer<vtkPoints>::New();
 	for (size_t i = 0; i < points.size(); ++i)
 	{
@@ -633,12 +639,14 @@ void Matlab_control_show::drawline()
 	// 设置颜色，RGB值范围0-1
 	actor1->GetProperty()->SetColor(1.0, 0.0, 0.0); //设置颜色为红色
 	renderer->AddActor(actor1);	
-	drawPoint(1, 1, 10, renderer);
-	drawPoint(1, 5, 10, renderer);
-	drawPoint(3, 6, 10, renderer);
-	drawPoint(1, 11, 10, renderer);
-	drawPoint(15, 20, 10, renderer);
-	drawPoint(12, 18, 10, renderer);
+	ui.qvtkWidget->GetRenderWindow()->Render();//刷新显示
+	//drawPoint(1, 1, 10, renderer);
+	//drawPoint(1, 5, 10, renderer);
+	//drawPoint(3, 6, 10, renderer);
+	//drawPoint(1, 11, 10, renderer);
+	//drawPoint(15, 20, 10, renderer);
+	//drawPoint(12, 18, 10, renderer);
+	//point2line(points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], renderer);
 }
 //画点
 void Matlab_control_show::drawPoint(double x, double y, double z, vtkSmartPointer<vtkRenderer> renderer)
@@ -668,4 +676,40 @@ void Matlab_control_show::drawPoint(double x, double y, double z, vtkSmartPointe
 
 	// 将actor添加到渲染器中
 	renderer->AddActor(pointsActor);
+}
+//点连成线的函数
+void Matlab_control_show::point2line(double x1, double y1, double z1, double x2, double y2, double z2, vtkSmartPointer<vtkRenderer> renderer)
+{
+	// 创建起点和终点
+	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+	points->InsertNextPoint(x1, y1, z1);
+	points->InsertNextPoint(x2, y2, z2);
+
+	// 创建线
+	vtkSmartPointer<vtkLine> line = vtkSmartPointer<vtkLine>::New();
+	line->GetPointIds()->SetId(0, 0); // 第一个点的索引
+	line->GetPointIds()->SetId(1, 1); // 第二个点的索引
+
+	// 创建用于存储 line 的单元格数组
+	vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+	lines->InsertNextCell(line);
+
+	// 创建线的PolyData
+	vtkSmartPointer<vtkPolyData> linesPolyData = vtkSmartPointer<vtkPolyData>::New();
+	linesPolyData->SetPoints(points);
+	linesPolyData->SetLines(lines);
+
+	// 创建映射器并设置PolyData
+	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper->SetInputData(linesPolyData);
+
+	// 创建actor并设置映射器
+	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+	actor->SetMapper(mapper);
+	// 设置线宽
+	actor->GetProperty()->SetLineWidth(2); //设置线宽为2
+	// 设置颜色，RGB值范围0-1
+	actor->GetProperty()->SetColor(0.0, 0.0, 1.0); //设置颜色为红色
+	// 将actor添加到渲染器中
+	renderer->AddActor(actor);
 }
