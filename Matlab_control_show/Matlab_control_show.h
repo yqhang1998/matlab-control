@@ -12,6 +12,7 @@ QT_CHARTS_USE_NAMESPACE
 //#include <vtkActor.h>
 //#include <vtkRenderer.h>
 //#include <vtkRenderWindow.h>
+#include <vtkVertexGlyphFilter.h>
 #include <vtkProperty.h>
 #include <vtkPolyLine.h>
 #include <vtkSmartPointer.h>
@@ -96,6 +97,7 @@ private:
 
 	vtkSmartPointer<vtkActor> actor;
 	vtkSmartPointer<vtkActor> actor1;
+	vtkSmartPointer<vtkActor> pointsActor;
 	vtkSmartPointer<vtkRenderer> renderer;
 	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWindow;
 
@@ -171,6 +173,8 @@ private:
 	int x_num, y_num;
 	double x_start, y_start, x_step, y_step, z_start;
 	std::vector<std::vector<double>> points;
+	//»­µã
+	void drawPoint(double x, double y, double z, vtkSmartPointer<vtkRenderer> renderer);
 
 
 private slots:

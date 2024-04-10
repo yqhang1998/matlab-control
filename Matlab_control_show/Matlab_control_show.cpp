@@ -150,6 +150,7 @@ void Matlab_control_show::initVTK()
 	renderer->AddActor(axes);
 	// 设置渲染器背景色等属性
 	renderer->SetBackground(0.1, 0.1, 0.1);
+	
 	// 渲染窗口初始化
 	ui.qvtkWidget->GetRenderWindow()->Render();
 }
@@ -580,10 +581,12 @@ std::vector<std::vector<double>> Matlab_control_show::Fcn_plane_xyzrpy(int count
 //划线
 void Matlab_control_show::drawline()
 {
+
 	if (actor1)
 	{
 		renderer->RemoveActor(actor1);
 	}
+
 	//x起始坐标y起始坐标z坐标以及对应步距的获取
 //x方向采集数量
 	x_num = ui.lineEdit_7->text().toInt();
@@ -629,7 +632,40 @@ void Matlab_control_show::drawline()
 	actor1->GetProperty()->SetLineWidth(2); //设置线宽为2
 	// 设置颜色，RGB值范围0-1
 	actor1->GetProperty()->SetColor(1.0, 0.0, 0.0); //设置颜色为红色
-	renderer->AddActor(actor1);
+	renderer->AddActor(actor1);	
+	drawPoint(1, 1, 10, renderer);
+	drawPoint(1, 5, 10, renderer);
+	drawPoint(3, 6, 10, renderer);
+	drawPoint(1, 11, 10, renderer);
+	drawPoint(15, 20, 10, renderer);
+	drawPoint(12, 18, 10, renderer);
+}
+//画点
+void Matlab_control_show::drawPoint(double x, double y, double z, vtkSmartPointer<vtkRenderer> renderer)
+{
+	// 创建点
+	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+	points->InsertNextPoint(x, y, z);
 
+	// 创建基于点的PolyData
+	vtkSmartPointer<vtkPolyData> pointsPolyData = vtkSmartPointer<vtkPolyData>::New();
+	pointsPolyData->SetPoints(points);
 
+	// 创建顶点数据
+	vtkSmartPointer<vtkVertexGlyphFilter> vertexFilter = vtkSmartPointer<vtkVertexGlyphFilter>::New();
+	vertexFilter->SetInputData(pointsPolyData);
+	vertexFilter->Update();
+
+	// 创建映射器并将顶点数据添加到其中
+	vtkSmartPointer<vtkPolyDataMapper> pointsMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	pointsMapper->SetInputConnection(vertexFilter->GetOutputPort());
+
+	// 创建actor并将映射器添加到其中
+	vtkSmartPointer<vtkActor> pointsActor = vtkSmartPointer<vtkActor>::New();
+	pointsActor->SetMapper(pointsMapper);
+	pointsActor->GetProperty()->SetPointSize(5);  // 设置点的大小
+	pointsActor->GetProperty()->SetColor(1.0, 0.0, 0.0);  // 设置颜色为红色
+
+	// 将actor添加到渲染器中
+	renderer->AddActor(pointsActor);
 }
