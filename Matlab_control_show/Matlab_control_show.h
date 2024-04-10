@@ -12,8 +12,8 @@ QT_CHARTS_USE_NAMESPACE
 //#include <vtkActor.h>
 //#include <vtkRenderer.h>
 //#include <vtkRenderWindow.h>
-
-
+#include <vtkProperty.h>
+#include <vtkPolyLine.h>
 #include <vtkSmartPointer.h>
 #include <vtkSTLReader.h>
 #include <vtkPolyDataMapper.h>
@@ -95,6 +95,7 @@ private:
 	void initVTK();
 
 	vtkSmartPointer<vtkActor> actor;
+	vtkSmartPointer<vtkActor> actor1;
 	vtkSmartPointer<vtkRenderer> renderer;
 	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWindow;
 
@@ -167,7 +168,8 @@ private:
 	//生成点的函数
 	bool isEven(int num);
 	std::vector<std::vector<double>> Fcn_plane_xyzrpy(int count1, int count2, double x_step, double y_step, double x_start, double y_start, double z);
-	int x_num, y_num, x_start, y_start, x_step, y_step, z_start;
+	int x_num, y_num;
+	double x_start, y_start, x_step, y_step, z_start;
 	std::vector<std::vector<double>> points;
 
 
@@ -183,7 +185,8 @@ private slots:
 	//tcp
 	void newConnection_slot();
 	void readyRead_slot();  //自定义处理readyRead信号的槽函数
-
+	//路径规划划线
+	void drawline();
 
 };
 

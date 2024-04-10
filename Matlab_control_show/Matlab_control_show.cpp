@@ -18,7 +18,9 @@ Matlab_control_show::Matlab_control_show(QWidget *parent)
 	QObject::connect(ui.btnClear, SIGNAL(clicked(bool)), this, SLOT(slotBtnClear()));
 	//启动定时器
 	QObject::connect(ui.btnStartAndStop, SIGNAL(clicked(bool)), this, SLOT(slotBtnStartAndStop()));
-
+	//label显示边框
+	ui.label->setStyleSheet("border: 1px solid black");
+	ui.label_2->setStyleSheet("border: 1px solid black");
 	//
 	// 创建横纵坐标轴并设置显示范围
 	//
@@ -64,8 +66,6 @@ Matlab_control_show::Matlab_control_show(QWidget *parent)
 	m_c_start->setPen(pen2);
 	m_c_end->setPen(pen2);
 
-
-
 	m_chart = new QChart();                                        // 创建图表对象
 	m_chart->addAxis(m_axisY, Qt::AlignLeft);                      // 将X轴添加到图表上
 	m_chart->addAxis(m_axisX, Qt::AlignBottom);                    // 将Y轴添加到图表上
@@ -77,8 +77,6 @@ Matlab_control_show::Matlab_control_show(QWidget *parent)
 	m_chart->addSeries(m_c_end);
 
 	m_chart->setAnimationOptions(QChart::SeriesAnimations);        // 动画：能使曲线绘制显示的更平滑，过渡效果更好看
-
-
 
 	m_lineSeries->attachAxis(m_axisX);                             // 曲线对象关联上X轴，此步骤必须在m_chart->addSeries之后
 	m_lineSeries->attachAxis(m_axisY);                             // 曲线对象关联上Y轴，此步骤必须在m_chart->addSeries之后
@@ -104,11 +102,6 @@ Matlab_control_show::Matlab_control_show(QWidget *parent)
 	//
 	ui.label->installEventFilter(this);//b_scan
 	ui.label_2->installEventFilter(this);//c_scan
-
-
-	
-	
-
 	//控制绘图与否
 	drawImage = false;
 	//image1 = QImage(rows_c, cols_c, QImage::Format_RGB32);   
@@ -132,10 +125,14 @@ void Matlab_control_show::initVTK()
 	vtkSmartPointer<vtkSTLReader> reader = vtkSmartPointer<vtkSTLReader>::New();
 	reader->SetFileName("C:/Users/yqh/Desktop/222.stl");
 	reader->Update();
-
-
+	
+	
+	
 	// 创建VTK渲染器和坐标轴对象
-	//axes = vtkSmartPointer<vtkAxesActor>::New();
+	axes = vtkSmartPointer<vtkAxesActor>::New();
+	// 设定坐标轴的位置
+	axes->SetAxisLabels(1); //打开坐标轴标签
+	axes->SetTotalLength(5, 5, 5); 
 
 	// 创建映射器和演员 大家可以想像成一个舞台表演人员穿着表演服饰。Mapper(映射器)：把不同的数据类型，转成图形数据。Actor(演员)：执行渲染mapper的对象。
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
@@ -143,15 +140,14 @@ void Matlab_control_show::initVTK()
 
 	actor = vtkSmartPointer<vtkActor>::New();
 	actor->SetMapper(mapper);
-
+	actor->SetPosition(0.0, 0.0, 0.0);
 	// 创建 VTK 渲染器 渲染器顾名思义是用来渲染图像的，将演员加入渲染器，相当于舞台表演人员站上了舞台。
 	renderer = vtkSmartPointer<vtkRenderer>::New();
 	ui.qvtkWidget->GetRenderWindow()->AddRenderer(renderer);//这一步是使用qt的不同之处从ui界面获取qvtkwidget控件的渲染窗口，将渲染器加进去。渲染窗口可以理解成一个剧院，里面有舞台、演员。就可以很好的展示图形了。
 	// 添加演员到渲染器
 	renderer->AddActor(actor);
-
 	// 将坐标轴对象添加到渲染器中
-	//renderer->AddActor(axes);
+	renderer->AddActor(axes);
 	// 设置渲染器背景色等属性
 	renderer->SetBackground(0.1, 0.1, 0.1);
 	// 渲染窗口初始化
@@ -351,7 +347,8 @@ void Matlab_control_show::upPaint1()
 		image1.setPixelColor(i, a-1, color);
 	}
 	//将整个显示充满label中
-	scaledImage = image1.scaled(ui.label_2->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+	//scaledImage = image1.scaled(ui.label_2->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);  Qt::KeepAspectRatio
+	scaledImage = image1.scaled(ui.label_2->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 	painter.drawImage(0, 0, scaledImage); // 在（0，0）位置处绘制图像
 
 }
@@ -549,23 +546,7 @@ void Matlab_control_show::pushButtonConfig_clicked()
 		m_c_end->append(c_scan_end, i);
 	}
 
-	//x起始坐标y起始坐标z坐标以及对应步距的获取
-	//x方向采集数量
-	x_num = ui.lineEdit_7->text().toInt();
-	//y方向采集数量
-	y_num = ui.lineEdit_8->text().toInt();
-	//x方向步距    
-	x_step = ui.lineEdit_8->text().toInt();
-	//y方向步距
-	y_step = ui.lineEdit_8->text().toInt();
-	//起点坐标x
-	x_start = ui.lineEdit_8->text().toInt();
-	//起点坐标y
-	y_start = ui.lineEdit_8->text().toInt();
-	//起点坐标z
-	z_start = ui.lineEdit_8->text().toInt();
-	//config按下之后生成坐标
-	points=Fcn_plane_xyzrpy(x_num, y_num, x_step, y_step, x_start, y_start, z_start);
+
 }
 
 //生成点的函数
@@ -594,4 +575,61 @@ std::vector<std::vector<double>> Matlab_control_show::Fcn_plane_xyzrpy(int count
 		}
 	}
 	return points;
+}
+
+//划线
+void Matlab_control_show::drawline()
+{
+	if (actor1)
+	{
+		renderer->RemoveActor(actor1);
+	}
+	//x起始坐标y起始坐标z坐标以及对应步距的获取
+//x方向采集数量
+	x_num = ui.lineEdit_7->text().toInt();
+	//y方向采集数量
+	y_num = ui.lineEdit_8->text().toInt();
+	//x方向步距    
+	x_step = ui.lineEdit_9->text().toDouble();
+	//y方向步距
+	y_step = ui.lineEdit_10->text().toDouble();
+	//起点坐标x
+	x_start = ui.lineEdit_11->text().toDouble();
+	//起点坐标y
+	y_start = ui.lineEdit_12->text().toDouble();
+	//起点坐标z
+	z_start = ui.lineEdit_13->text().toDouble();
+	//std::cout << x_num << " " << y_num << " " << x_step << " " << y_step << " " << x_start << " " << y_start << " " << z_start << std::endl;
+	//计算出来的坐标点
+	points = Fcn_plane_xyzrpy(x_num, y_num, x_step, y_step, x_start, y_start, z_start);
+	//points = Fcn_plane_xyzrpy(30, 30, 0.1, 0.1, 20, 20, 10);
+	vtkSmartPointer<vtkPoints> vpoints = vtkSmartPointer<vtkPoints>::New();
+	for (size_t i = 0; i < points.size(); ++i)
+	{
+		vpoints->InsertNextPoint(points[i][0], points[i][1], points[i][2]);
+	}
+	//连接这些点
+	vtkSmartPointer<vtkPolyLine> vpolyLine = vtkSmartPointer<vtkPolyLine>::New();
+	vpolyLine->GetPointIds()->SetNumberOfIds(vpoints->GetNumberOfPoints());
+	for (unsigned int i = 0; i < points.size(); i++)
+	{
+		vpolyLine->GetPointIds()->SetId(i, i);
+	}
+	//创造单元格数组
+	vtkSmartPointer<vtkCellArray> cells = vtkSmartPointer<vtkCellArray>::New();
+	cells->InsertNextCell(vpolyLine);
+	vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+	polyData->SetPoints(vpoints);
+	polyData->SetLines(cells);
+	vtkSmartPointer<vtkPolyDataMapper> mapper1 = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper1->SetInputData(polyData);
+	actor1 = vtkSmartPointer<vtkActor>::New();
+	actor1->SetMapper(mapper1);
+	// 设置线宽
+	actor1->GetProperty()->SetLineWidth(2); //设置线宽为2
+	// 设置颜色，RGB值范围0-1
+	actor1->GetProperty()->SetColor(1.0, 0.0, 0.0); //设置颜色为红色
+	renderer->AddActor(actor1);
+
+
 }
