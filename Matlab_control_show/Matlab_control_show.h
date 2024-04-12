@@ -81,7 +81,6 @@ public:
 	void upPaint1();//画c_scan图
 	double differenceMinMax(QVector<double> vec);//返回最大差值
 
-
 private slots:
 	//处理select点击
 	void pushButtonSelect_clicked();
@@ -94,7 +93,7 @@ private slots:
 
 private:
 	Ui::Matlab_control_showClass ui;
-	void initVTK();
+	void initVTK(const QString &modelname);
 
 	vtkSmartPointer<vtkActor> actor;
 	vtkSmartPointer<vtkActor> actor1;
@@ -178,7 +177,7 @@ private:
 	void drawPoint(double x, double y, double z, vtkSmartPointer<vtkRenderer> renderer);
 	//点连成线函数
 	void point2line(double x1, double y1, double z1, double x2, double y2, double z2, vtkSmartPointer<vtkRenderer> renderer);
-
+	
 private slots:
 	void slotBtnClear();
 	void slotBtnStartAndStop();

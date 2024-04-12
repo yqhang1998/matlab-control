@@ -5,7 +5,19 @@ Matlab_control_show::Matlab_control_show(QWidget *parent)
 {
 	ui.setupUi(this);
 	// 配置 VTK 的初始设置，这个函数用来显示stl模型
-	initVTK();
+	//initVTK("trumpet");
+	//combobox
+	QObject::connect(ui.comboBox, &QComboBox::currentTextChanged,
+		[=](const QString& text) {
+		if (text == "平面")
+		{
+			initVTK("222");
+		}
+		else if (text == "喇叭口")
+		{
+			initVTK("trumpet");
+		}
+	});
 	//创建服务器对象
 	server = new QTcpServer();
 
@@ -119,11 +131,16 @@ Matlab_control_show::~Matlab_control_show()
 	socket = nullptr;
 }
 
-void Matlab_control_show::initVTK()
+void Matlab_control_show::initVTK(const QString &modelname)
 {
+	// 你的文件路径
+	QString filePath = "C:/Users/yqh/Desktop/";
+	filePath += modelname+ ".stl";
 	// 读取 STL 文件  创建 STL 读取器
 	vtkSmartPointer<vtkSTLReader> reader = vtkSmartPointer<vtkSTLReader>::New();
-	reader->SetFileName("C:/Users/yqh/Desktop/222.stl");
+	//reader->SetFileName("C:/Users/yqh/Desktop/222.stl");
+	//reader->SetFileName("C:/Users/yqh/Desktop/trumpet.stl");
+	reader->SetFileName(filePath.toStdString().c_str());
 	reader->Update();
 	
 	
@@ -132,7 +149,7 @@ void Matlab_control_show::initVTK()
 	axes = vtkSmartPointer<vtkAxesActor>::New();
 	// 设定坐标轴的位置
 	axes->SetAxisLabels(1); //打开坐标轴标签
-	axes->SetTotalLength(5, 5, 5); 
+	axes->SetTotalLength(50, 50, 50); 
 
 	// 创建映射器和演员 大家可以想像成一个舞台表演人员穿着表演服饰。Mapper(映射器)：把不同的数据类型，转成图形数据。Actor(演员)：执行渲染mapper的对象。
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
@@ -142,7 +159,13 @@ void Matlab_control_show::initVTK()
 	actor->SetMapper(mapper);
 	actor->SetPosition(0.0, 0.0, 0.0);
 	// 创建 VTK 渲染器 渲染器顾名思义是用来渲染图像的，将演员加入渲染器，相当于舞台表演人员站上了舞台。
-	renderer = vtkSmartPointer<vtkRenderer>::New();
+		// 在这里检查并清除已存在的模型数据
+	if (renderer != nullptr) {
+		renderer->RemoveAllViewProps(); // 移除所有的演员
+	}
+	else {
+		renderer = vtkSmartPointer<vtkRenderer>::New();
+	}
 	ui.qvtkWidget->GetRenderWindow()->AddRenderer(renderer);//这一步是使用qt的不同之处从ui界面获取qvtkwidget控件的渲染窗口，将渲染器加进去。渲染窗口可以理解成一个剧院，里面有舞台、演员。就可以很好的展示图形了。
 	// 添加演员到渲染器
 	renderer->AddActor(actor);
@@ -150,7 +173,6 @@ void Matlab_control_show::initVTK()
 	renderer->AddActor(axes);
 	// 设置渲染器背景色等属性
 	renderer->SetBackground(0.1, 0.1, 0.1);
-	
 	// 渲染窗口初始化
 	ui.qvtkWidget->GetRenderWindow()->Render();
 }
@@ -557,7 +579,7 @@ void Matlab_control_show::pushButtonConfig_clicked()
 
 }
 
-//生成点的函数
+//生成平面扫查点的函数（机械臂位姿点）
 bool Matlab_control_show::isEven(int num) {
 	return num % 2 == 0;
 }
