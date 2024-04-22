@@ -12,6 +12,12 @@ QT_CHARTS_USE_NAMESPACE
 //#include <vtkActor.h>
 //#include <vtkRenderer.h>
 //#include <vtkRenderWindow.h>
+#include <vtkLODActor.h>
+#include <vtkTransformFilter.h>
+#include <vtkCamera.h>
+#include <vtkTransformPolyDataFilter.h>
+#include <vtkTransform.h>
+#include <vtkCenterOfMass.h>
 #include <vtkLine.h>
 #include <vtkVertexGlyphFilter.h>
 #include <vtkProperty.h>
@@ -157,10 +163,6 @@ private:
 	int c_scan_start;
 	int c_scan_end;
 
-	//ur_tcp
-	//QTcpSocket *server_;
-	//QString IP_;
-	//QString port_;
 	QTcpSocket *socket;
 	QTcpServer *server;
 	//定义客户端指针链表容器
@@ -177,7 +179,13 @@ private:
 	void drawPoint(double x, double y, double z, vtkSmartPointer<vtkRenderer> renderer);
 	//点连成线函数
 	void point2line(double x1, double y1, double z1, double x2, double y2, double z2, vtkSmartPointer<vtkRenderer> renderer);
-	
+
+	//喇叭口点生成函数
+	std::vector<std::vector<double>> Fcn_trumpet_xyzrpy(double cx, double cy, double cz, double step, double tool_len);
+	double cx, cy, cz, tool_len,step;
+	int samples1, samples2;
+
+
 private slots:
 	void slotBtnClear();
 	void slotBtnStartAndStop();
@@ -187,11 +195,13 @@ private slots:
 	void pushButton_2_clicked();
 	//config
 	void pushButtonConfig_clicked();
-	//tcp
+	//tcp连接
 	void newConnection_slot();
 	void readyRead_slot();  //自定义处理readyRead信号的槽函数
-	//路径规划划线
+	//平面工件路径规划划线
 	void drawline();
+	//喇叭口工件路径规划画线
+	void drawcurve();
 
 };
 

@@ -298,13 +298,20 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>1190</x>
-      <y>520</y>
+      <x>1160</x>
+      <y>500</y>
       <width>275</width>
-      <height>269</height>
+      <height>301</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_4">
+     <item>
+      <widget class="QLabel" name="label_16">
+       <property name="text">
+        <string>平面工件</string>
+       </property>
+      </widget>
+     </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_7">
        <item>
@@ -431,20 +438,112 @@
        </item>
       </layout>
      </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_config_2">
+       <property name="text">
+        <string>路径生成</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
-   <widget class="QPushButton" name="pushButton_config_2">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>1204</x>
-      <y>820</y>
-      <width>121</width>
-      <height>51</height>
+      <x>1160</x>
+      <y>850</y>
+      <width>281</width>
+      <height>211</height>
      </rect>
     </property>
-    <property name="text">
-     <string>路径生成</string>
-    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_5">
+     <item>
+      <widget class="QLabel" name="label_17">
+       <property name="text">
+        <string>喇叭口工件</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_14">
+       <item>
+        <widget class="QLabel" name="label_18">
+         <property name="text">
+          <string>中心点坐标x</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEdit_14">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_15">
+       <item>
+        <widget class="QLabel" name="label_19">
+         <property name="text">
+          <string>中心点坐标y</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEdit_15">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_16">
+       <item>
+        <widget class="QLabel" name="label_20">
+         <property name="text">
+          <string>中心点坐标z</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEdit_16">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_17">
+       <item>
+        <widget class="QLabel" name="label_21">
+         <property name="text">
+          <string>步距step</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEdit_17">
+         <property name="text">
+          <string>0.5</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_config_3">
+       <property name="text">
+        <string>路径生成</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -522,7 +621,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>478</x>
-     <y>337</y>
+     <y>336</y>
     </hint>
     <hint type="destinationlabel">
      <x>463</x>
@@ -569,12 +668,28 @@
    <slot>drawline()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1265</x>
-     <y>894</y>
+     <x>1222</x>
+     <y>833</y>
     </hint>
     <hint type="destinationlabel">
      <x>1430</x>
      <y>993</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_config_3</sender>
+   <signal>clicked()</signal>
+   <receiver>Matlab_control_showClass</receiver>
+   <slot>drawcurve()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1226</x>
+     <y>1082</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1241</x>
+     <y>1202</y>
     </hint>
    </hints>
   </connection>
@@ -589,5 +704,6 @@
   <slot>pushButton_2_clicked()</slot>
   <slot>drawline()</slot>
   <slot>slot2()</slot>
+  <slot>drawcurve()</slot>
  </slots>
 </ui>

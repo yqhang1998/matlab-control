@@ -143,21 +143,54 @@ void Matlab_control_show::initVTK(const QString &modelname)
 	reader->SetFileName(filePath.toStdString().c_str());
 	reader->Update();
 	
-	
-	
 	// 创建VTK渲染器和坐标轴对象
 	axes = vtkSmartPointer<vtkAxesActor>::New();
 	// 设定坐标轴的位置
 	axes->SetAxisLabels(1); //打开坐标轴标签
 	axes->SetTotalLength(50, 50, 50); 
+	//// 将现有的坐标轴绕x轴旋转，但是旋转后坐标还是按照以前的坐标系来计算，无法更新坐标 ，所以使用将模型移动
+	//vtkSmartPointer<vtkTransform> rotation = vtkSmartPointer<vtkTransform>::New();
+	//rotation->RotateX(-90);  // 顺时针旋转90°
+	//// Apply the rotation to the axes actor
+	//axes->SetUserTransform(rotation);
+	// 创建一个 vtkTransform 对象
+	vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
+
+	// 设置旋转，以度为单位
+	// RotateWXYZ 方法的第一个参数是旋转角度，后三个参数是旋转轴上的向量
+	transform->RotateWXYZ(90, 1.0, 0.0, 0.0); // 沿着X轴旋转45度
+
+	// 创建一个 vtkTransformPolyDataFilter 对象，将 vtkTransform 应用到 PolyData 对象
+	vtkSmartPointer<vtkTransformPolyDataFilter> transformFilter = vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+	transformFilter->SetTransform(transform);
+	transformFilter->SetInputConnection(reader->GetOutputPort());
+	transformFilter->Update();
+
 
 	// 创建映射器和演员 大家可以想像成一个舞台表演人员穿着表演服饰。Mapper(映射器)：把不同的数据类型，转成图形数据。Actor(演员)：执行渲染mapper的对象。
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-	mapper->SetInputData(reader->GetOutput());
+	/*mapper->SetInputData(reader->GetOutput());*/
+	mapper->SetInputData(transformFilter->GetOutput());
+	
 
+	//设置位置
+	// 计算模型的几何中心
+	vtkSmartPointer<vtkCenterOfMass> centerOfMassFilter = vtkSmartPointer<vtkCenterOfMass>::New();
+	centerOfMassFilter->SetInputConnection(transformFilter->GetOutputPort());
+	centerOfMassFilter->SetUseScalarsAsWeights(false);
+	centerOfMassFilter->Update();
+	double center[3];
+	centerOfMassFilter->GetCenter(center);
+
+	// 创建actor并设置位置
 	actor = vtkSmartPointer<vtkActor>::New();
 	actor->SetMapper(mapper);
-	actor->SetPosition(0.0, 0.0, 0.0);
+	// 以模型几何中心为基准，将模型位置设置为原点
+	actor->SetPosition(-center[0], -center[1], /*-center[2]*/0);
+	std::cout << -center[0] << " " << -center[1] << " " << -center[2];
+
+
+
 	// 创建 VTK 渲染器 渲染器顾名思义是用来渲染图像的，将演员加入渲染器，相当于舞台表演人员站上了舞台。
 		// 在这里检查并清除已存在的模型数据
 	if (renderer != nullptr) {
@@ -166,6 +199,9 @@ void Matlab_control_show::initVTK(const QString &modelname)
 	else {
 		renderer = vtkSmartPointer<vtkRenderer>::New();
 	}
+
+
+
 	ui.qvtkWidget->GetRenderWindow()->AddRenderer(renderer);//这一步是使用qt的不同之处从ui界面获取qvtkwidget控件的渲染窗口，将渲染器加进去。渲染窗口可以理解成一个剧院，里面有舞台、演员。就可以很好的展示图形了。
 	// 添加演员到渲染器
 	renderer->AddActor(actor);
@@ -579,7 +615,7 @@ void Matlab_control_show::pushButtonConfig_clicked()
 
 }
 
-//生成平面扫查点的函数（机械臂位姿点）
+//生成平面工件扫查点的函数（机械臂位姿点）
 bool Matlab_control_show::isEven(int num) {
 	return num % 2 == 0;
 }
@@ -607,17 +643,16 @@ std::vector<std::vector<double>> Matlab_control_show::Fcn_plane_xyzrpy(int count
 	return points;
 }
 
-//路径生成函数
+//平面工件路径生成函数
 void Matlab_control_show::drawline()
 {
-
+	//如果有现有路径就先移除，不然会重复叠加路径的曲线
 	if (actor1)
 	{
 		renderer->RemoveActor(actor1);
 	}
-
 	//x起始坐标y起始坐标z坐标以及对应步距的获取
-//x方向采集数量
+	//x方向采集数量
 	x_num = ui.lineEdit_7->text().toInt();
 	//y方向采集数量
 	y_num = ui.lineEdit_8->text().toInt();
@@ -670,7 +705,7 @@ void Matlab_control_show::drawline()
 	//drawPoint(12, 18, 10, renderer);
 	//point2line(points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], renderer);
 }
-//画点
+//画缺陷点函数
 void Matlab_control_show::drawPoint(double x, double y, double z, vtkSmartPointer<vtkRenderer> renderer)
 {
 	// 创建点
@@ -734,4 +769,101 @@ void Matlab_control_show::point2line(double x1, double y1, double z1, double x2,
 	actor->GetProperty()->SetColor(0.0, 0.0, 1.0); //设置颜色为红色
 	// 将actor添加到渲染器中
 	renderer->AddActor(actor);
+}
+
+//喇叭口工件路径点生成函数
+std::vector<std::vector<double>> Matlab_control_show::Fcn_trumpet_xyzrpy(double cx, double cy, double cz, double step, double tool_len)
+{
+	int samples= 287.9577 / step;
+	double radius2 = 270.0;
+	double angle2 = 44.13 * M_PI / 180.0;
+	double r_len = angle2 * radius2;
+	samples1 = static_cast<int>(round(samples * 80 / (r_len + 80)));
+	samples2 = samples - samples1;
+
+	std::vector<std::vector<double>> pts;
+	for (int i = 0; i < samples1; ++i)
+	{
+		std::vector<double> pt(6);
+		pt[0] = cx;
+		pt[1] = cy + 100 + tool_len;
+		pt[2] = cz + 280 - i / (double)(samples1 - 1) * 80;
+		pt[3] = 90 * M_PI / 180;
+		pt[4] = 0;
+		pt[5] = 0;
+
+		pts.push_back(pt);
+	}
+
+	for (int j = 0; j < samples2; ++j)
+	{
+		std::vector<double> pt(6);
+		pt[0] = cx;
+		pt[1] = cy + 100 + tool_len + (radius2 - tool_len) * (1 - cos(j / (double)samples2 * angle2));
+		pt[2] = cz + 200 - (radius2 - tool_len) * sin(j / (double)samples2 * angle2);
+		pt[3] = (90 + j / (double)samples2 * angle2 * 180 / M_PI) * M_PI / 180;
+		pt[4] = 0;
+		pt[5] = 0;
+
+		pts.push_back(pt);
+	}
+	return pts;
+}
+//喇叭口画线函数
+void Matlab_control_show::drawcurve()
+{
+	//如果有现有路径就先移除，不然会重复叠加路径的曲线
+	if (actor1)
+	{
+		renderer->RemoveActor(actor1);
+	}
+	cx = ui.lineEdit_14->text().toDouble();
+	cy = ui.lineEdit_15->text().toDouble();
+	cz= ui.lineEdit_16->text().toDouble();
+	step = ui.lineEdit_17->text().toDouble();
+	//计算出来的坐标点 tool_len设置190
+	if (!points.empty()) {
+		points.clear();
+	}
+	points = Fcn_trumpet_xyzrpy(cx, cy, cz, step,0);
+
+	vtkSmartPointer<vtkPoints> vtk_points = vtkSmartPointer<vtkPoints>::New();
+
+	for (size_t i = 0; i < points.size(); ++i) {
+		vtk_points->InsertNextPoint(points[i][0], points[i][1], points[i][2]);
+	}
+
+	vtkSmartPointer<vtkPolyLine> polyLine1 = vtkSmartPointer<vtkPolyLine>::New();
+	polyLine1->GetPointIds()->SetNumberOfIds(samples1);
+
+	for (unsigned int i = 0; i < samples1; ++i) {
+		polyLine1->GetPointIds()->SetId(i, i);
+	}
+
+	vtkSmartPointer<vtkPolyLine> polyLine2 = vtkSmartPointer<vtkPolyLine>::New();
+	polyLine2->GetPointIds()->SetNumberOfIds(points.size() - samples1);
+
+	for (size_t j = samples1; j < points.size(); ++j) {
+		polyLine2->GetPointIds()->SetId(j - samples1, j);
+	}
+
+	vtkSmartPointer<vtkCellArray> cells = vtkSmartPointer<vtkCellArray>::New();
+	cells->InsertNextCell(polyLine1);
+	cells->InsertNextCell(polyLine2);
+
+	vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+	polyData->SetPoints(vtk_points);
+	polyData->SetLines(cells);
+
+	vtkSmartPointer<vtkPolyDataMapper> mapper1 = vtkSmartPointer<vtkPolyDataMapper>::New();
+	mapper1->SetInputData(polyData);
+
+	actor1 = vtkSmartPointer<vtkActor>::New();
+	actor1->SetMapper(mapper1);
+	// 设置线宽
+	actor1->GetProperty()->SetLineWidth(6); //设置线宽为2
+	// 设置颜色，RGB值范围0-1
+	actor1->GetProperty()->SetColor(1.0, 0.0, 0.0); //设置颜色为红色
+	renderer->AddActor(actor1);
+	ui.qvtkWidget->GetRenderWindow()->Render();
 }
