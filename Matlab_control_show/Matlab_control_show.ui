@@ -30,7 +30,7 @@
       <x>20</x>
       <y>720</y>
       <width>501</width>
-      <height>75</height>
+      <height>154</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -75,6 +75,9 @@
         </widget>
        </item>
       </layout>
+     </item>
+     <item>
+      <widget class="QListWidget" name="listWidget"/>
      </item>
     </layout>
    </widget>
@@ -146,7 +149,7 @@
       <x>610</x>
       <y>710</y>
       <width>291</width>
-      <height>34</height>
+      <height>35</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -275,8 +278,8 @@
    <widget class="QPushButton" name="pushButton_config">
     <property name="geometry">
      <rect>
-      <x>434</x>
-      <y>262</y>
+      <x>410</x>
+      <y>260</y>
       <width>81</width>
       <height>41</height>
      </rect>
@@ -285,23 +288,13 @@
      <string>config</string>
     </property>
    </widget>
-   <widget class="QListWidget" name="listWidget">
-    <property name="geometry">
-     <rect>
-      <x>1165</x>
-      <y>280</y>
-      <width>191</width>
-      <height>192</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>1160</x>
       <y>500</y>
       <width>275</width>
-      <height>301</height>
+      <height>346</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -453,7 +446,7 @@
       <x>1160</x>
       <y>850</y>
       <width>281</width>
-      <height>211</height>
+      <height>226</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -545,6 +538,186 @@
      </item>
     </layout>
    </widget>
+   <widget class="QPushButton" name="pushButton_3">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>70</y>
+      <width>128</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>load</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_22">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>130</y>
+      <width>108</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="BtnReadDXF">
+    <property name="geometry">
+     <rect>
+      <x>1200</x>
+      <y>390</y>
+      <width>111</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Read</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="Zoom">
+    <property name="geometry">
+     <rect>
+      <x>1290</x>
+      <y>340</y>
+      <width>102</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="EditYCenter">
+    <property name="geometry">
+     <rect>
+      <x>1290</x>
+      <y>220</y>
+      <width>108</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_23">
+    <property name="geometry">
+     <rect>
+      <x>1193</x>
+      <y>300</y>
+      <width>91</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Y偏移量：</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="YOffset">
+    <property name="geometry">
+     <rect>
+      <x>1290</x>
+      <y>300</y>
+      <width>108</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_24">
+    <property name="geometry">
+     <rect>
+      <x>1183</x>
+      <y>190</y>
+      <width>101</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>中心点X：</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_25">
+    <property name="geometry">
+     <rect>
+      <x>1193</x>
+      <y>260</y>
+      <width>91</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>X偏移量：</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_26">
+    <property name="geometry">
+     <rect>
+      <x>1183</x>
+      <y>220</y>
+      <width>101</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>中心点Y：</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_27">
+    <property name="geometry">
+     <rect>
+      <x>1193</x>
+      <y>340</y>
+      <width>91</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>缩放比例：</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="XOffset">
+    <property name="geometry">
+     <rect>
+      <x>1290</x>
+      <y>260</y>
+      <width>108</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="EditXCenter">
+    <property name="geometry">
+     <rect>
+      <x>1290</x>
+      <y>190</y>
+      <width>108</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_4">
+    <property name="geometry">
+     <rect>
+      <x>1340</x>
+      <y>380</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Add</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_5">
+    <property name="geometry">
+     <rect>
+      <x>1340</x>
+      <y>420</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Delete</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -552,7 +725,7 @@
      <x>0</x>
      <y>0</y>
      <width>2012</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>
@@ -621,7 +794,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>478</x>
-     <y>336</y>
+     <y>335</y>
     </hint>
     <hint type="destinationlabel">
      <x>463</x>
@@ -668,8 +841,8 @@
    <slot>drawline()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1222</x>
-     <y>833</y>
+     <x>1224</x>
+     <y>879</y>
     </hint>
     <hint type="destinationlabel">
      <x>1430</x>
@@ -693,6 +866,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pushButton_3</sender>
+   <signal>clicked()</signal>
+   <receiver>Matlab_control_showClass</receiver>
+   <slot>dllload()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>139</x>
+     <y>123</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>216</x>
+     <y>282</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>BtnReadDXF</sender>
+   <signal>clicked()</signal>
+   <receiver>Matlab_control_showClass</receiver>
+   <slot>BtnReadDXF_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1243</x>
+     <y>452</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1165</x>
+     <y>485</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>pushButtonSelect_clicked()</slot>
@@ -705,5 +910,11 @@
   <slot>drawline()</slot>
   <slot>slot2()</slot>
   <slot>drawcurve()</slot>
+  <slot>slot1()</slot>
+  <slot>thread_start()</slot>
+  <slot>thread_stop()</slot>
+  <slot>dllload()</slot>
+  <slot>slot3()</slot>
+  <slot>BtnReadDXF_clicked()</slot>
  </slots>
 </ui>

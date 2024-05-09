@@ -38,11 +38,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <IncludePath>D:\qt\5.12.10\msvc2017_64\include\QtCharts;D:\qt\5.12.10\msvc2017_64\include\QtNetwork;$(IncludePath)</IncludePath>
+    <IncludePath>D:\qt\5.12.10\msvc2017_64\include\QtCharts;D:\qt\5.12.10\msvc2017_64\include\QtNetwork;C:\Users\yqh\source\repos\Matlab_control_show\Matlab_control_show\dxflib;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
       <AdditionalDependencies>Qt5Charts.lib;Qt5Network.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>editbin /SUBSYSTEM:CONSOLE $(OutDir)\$(ProjectName).exe</Command>
@@ -64,8 +65,31 @@
     <QtRcc Include="Matlab_control_show.qrc" />
     <QtUic Include="Matlab_control_show.ui" />
     <QtMoc Include="Matlab_control_show.h" />
+    <ClCompile Include="D:\QtdemoProj\QtCeShiXiangMu-master\DrawDXF\dxflib\dl_dxf.cpp" />
+    <ClCompile Include="D:\QtdemoProj\QtCeShiXiangMu-master\DrawDXF\dxflib\dl_writer_ascii.cpp" />
+    <ClCompile Include="dxfreader.cpp" />
+    <ClCompile Include="interactiveview.cpp" />
+    <ClCompile Include="jlineitem.cpp" />
+    <ClCompile Include="jtextitem.cpp" />
     <ClCompile Include="Matlab_control_show.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="dxflib\dl_attributes.h" />
+    <ClInclude Include="dxflib\dl_codes.h" />
+    <ClInclude Include="dxflib\dl_creationadapter.h" />
+    <ClInclude Include="dxflib\dl_creationinterface.h" />
+    <ClInclude Include="dxflib\dl_dxf.h" />
+    <ClInclude Include="dxflib\dl_entities.h" />
+    <ClInclude Include="dxflib\dl_exception.h" />
+    <ClInclude Include="dxflib\dl_extrusion.h" />
+    <ClInclude Include="dxflib\dl_global.h" />
+    <ClInclude Include="dxflib\dl_writer.h" />
+    <ClInclude Include="dxflib\dl_writer_ascii.h" />
+    <ClInclude Include="dxflib\jlineitem.h" />
+    <QtMoc Include="dxflib\jtextitem.h" />
+    <QtMoc Include="dxflib\interactiveview.h" />
+    <QtMoc Include="dxflib\dxfreader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

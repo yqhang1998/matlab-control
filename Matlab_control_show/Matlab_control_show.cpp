@@ -1,10 +1,26 @@
 #include "Matlab_control_show.h"
 #pragma execution_character_set("utf-8")//解决中文乱码问题
+
+//sasa(0, 1, 5, 5, 1, 20480, 0, 10);
+
+//extern "C" _declspec(dllexport) int sasa(int swId, int chId, float probeFreq,
+//	int extVolt,
+//	int transceiverMode,
+//	int scanLength,
+//	int readMode,
+//	int aScanGain);
+
 Matlab_control_show::Matlab_control_show(QWidget *parent)
-	: QMainWindow(parent)
+	: QMainWindow(parent),XOffset(9700),
+	YOffset(6100),
+	ZoomDelta(1),
+	XCenter(0),
+	YCenter(0)
 {
 	ui.setupUi(this);
 	// 配置 VTK 的初始设置，这个函数用来显示stl模型
+	
+
 	//initVTK("trumpet");
 	//combobox
 	QObject::connect(ui.comboBox, &QComboBox::currentTextChanged,
@@ -119,6 +135,24 @@ Matlab_control_show::Matlab_control_show(QWidget *parent)
 	//image1 = QImage(rows_c, cols_c, QImage::Format_RGB32);   
 	image1 = QImage(rows_c, cols_c, QImage::Format_ARGB32);
 	image1.fill(QColor(Qt::transparent));  //这行代码会将图像设置为透明
+
+
+	//cad加载部分
+	Scene = new QGraphicsScene;
+	Scene->setBackgroundBrush(QBrush(QColor(0, 0, 0)));
+	View = new InteractiveView(this);
+	View->setInteractive(true);
+	View->setDragMode(QGraphicsView::ScrollHandDrag);
+	View->setScene(Scene);
+	View->setRenderHints(QPainter::SmoothPixmapTransform);
+	View->setGeometry(1500, 100, 150, 150);
+	View->show();
+	ui.EditXCenter->setText(QString::number(XCenter, 'f', 3));
+	ui.EditYCenter->setText(QString::number(YCenter, 'f', 3));
+	ui.XOffset->setText(QString::number(XOffset, 'f', 3));
+	ui.YOffset->setText(QString::number(YOffset, 'f', 3));
+	ui.Zoom->setText(QString::number(ZoomDelta, 'f', 3));
+
 }
 
 Matlab_control_show::~Matlab_control_show()
@@ -136,18 +170,18 @@ void Matlab_control_show::initVTK(const QString &modelname)
 	// 你的文件路径
 	QString filePath = "C:/Users/yqh/Desktop/";
 	filePath += modelname+ ".stl";
-	// 读取 STL 文件  创建 STL 读取器
+		// 读取 STL 文件  创建 STL 读取器
 	vtkSmartPointer<vtkSTLReader> reader = vtkSmartPointer<vtkSTLReader>::New();
 	//reader->SetFileName("C:/Users/yqh/Desktop/222.stl");
 	//reader->SetFileName("C:/Users/yqh/Desktop/trumpet.stl");
 	reader->SetFileName(filePath.toStdString().c_str());
 	reader->Update();
-	
+
 	// 创建VTK渲染器和坐标轴对象
 	axes = vtkSmartPointer<vtkAxesActor>::New();
 	// 设定坐标轴的位置
 	axes->SetAxisLabels(1); //打开坐标轴标签
-	axes->SetTotalLength(50, 50, 50); 
+	axes->SetTotalLength(50, 50, 50);
 	//// 将现有的坐标轴绕x轴旋转，但是旋转后坐标还是按照以前的坐标系来计算，无法更新坐标 ，所以使用将模型移动
 	//vtkSmartPointer<vtkTransform> rotation = vtkSmartPointer<vtkTransform>::New();
 	//rotation->RotateX(-90);  // 顺时针旋转90°
@@ -171,7 +205,7 @@ void Matlab_control_show::initVTK(const QString &modelname)
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	/*mapper->SetInputData(reader->GetOutput());*/
 	mapper->SetInputData(transformFilter->GetOutput());
-	
+
 
 	//设置位置
 	// 计算模型的几何中心
@@ -211,6 +245,9 @@ void Matlab_control_show::initVTK(const QString &modelname)
 	renderer->SetBackground(0.1, 0.1, 0.1);
 	// 渲染窗口初始化
 	ui.qvtkWidget->GetRenderWindow()->Render();
+
+
+
 }
 
 void Matlab_control_show::pushButtonSelect_clicked() {
@@ -306,7 +343,7 @@ void Matlab_control_show::slotTimeout()
 		////c_scan数据处理
 		slice_vector = data1.mid(c_scan_start-1, c_scan_end-c_scan_start+2);
 		a = (num - 1) / 31;
-		b = (num - 1) % 31;
+		b = (num - 1) % 31;//取值范围0~30
 		if (a % 2 == 0)
 		{
 			c_scan[b] = differenceMinMax(slice_vector);
@@ -352,9 +389,10 @@ void Matlab_control_show::slotTimeout()
 		}
 	}
 	data1.clear();
-	//更新扫描轨迹
+	//////更新扫描轨迹
 	point2line(points[num][0], points[num][1], points[num][2], points[num+1][0], points[num+1][1], points[num+1][2], renderer);
-	ui.qvtkWidget->GetRenderWindow()->Render();
+	if(num%3==0)
+		ui.qvtkWidget->GetRenderWindow()->Render();
 	//更换文件
 	num++;
 }
@@ -428,9 +466,9 @@ void Matlab_control_show::datacalculate(QVector<QVector<double>>& b_scan)
 	int rows = b_scan.size(); // b_scan 的行数
 	int cols = b_scan.first().size(); // b_scan 的列数，假设所有行长度都相同
 
-	// 初始化为最大可能值和最小可能值
-	double minVal = std::numeric_limits<double>::max();
-	double maxVal = std::numeric_limits<double>::lowest();
+	// 初始化为double可能表示的最大可能值和最小可能值
+	double minVal = -1;//std::numeric_limits<double>::max();
+	double maxVal = 1.9;// std::numeric_limits<double>::lowest();
 
 	// 遍历 b_scan 中的每个元素找到最小值和最大值
 	for (const QVector<double>& vec : b_scan) {
@@ -703,7 +741,6 @@ void Matlab_control_show::drawline()
 	//drawPoint(1, 11, 10, renderer);
 	//drawPoint(15, 20, 10, renderer);
 	//drawPoint(12, 18, 10, renderer);
-	//point2line(points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2], renderer);
 }
 //画缺陷点函数
 void Matlab_control_show::drawPoint(double x, double y, double z, vtkSmartPointer<vtkRenderer> renderer)
@@ -764,7 +801,7 @@ void Matlab_control_show::point2line(double x1, double y1, double z1, double x2,
 	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
 	actor->SetMapper(mapper);
 	// 设置线宽
-	actor->GetProperty()->SetLineWidth(2); //设置线宽为2
+	actor->GetProperty()->SetLineWidth(6); //设置线宽为2
 	// 设置颜色，RGB值范围0-1
 	actor->GetProperty()->SetColor(0.0, 0.0, 1.0); //设置颜色为红色
 	// 将actor添加到渲染器中
@@ -867,3 +904,182 @@ void Matlab_control_show::drawcurve()
 	renderer->AddActor(actor1);
 	ui.qvtkWidget->GetRenderWindow()->Render();
 }
+
+//加载dll库
+void Matlab_control_show::dllload()
+{
+		//要加载两个dll库
+    //C: / Users / yqh / Desktop /
+	QString path_1 = "c.dll";
+	QString path_2 = "UTNetServiceUtil.dll";
+	QString path_3 = "UTNetUtil.dll";
+	QLibrary dllLib_1;
+	QLibrary dllLib_2;
+	QLibrary dllLib_3;
+	dllLib_1.setFileName(path_1);
+	dllLib_2.setFileName(path_2);
+	dllLib_3.setFileName(path_3);
+	if(dllLib_1.load()&& dllLib_2.load()&& dllLib_3.load())
+	{
+		ui.label_22->setText("success");
+	/*dllLib_1.unload();*/
+	}
+	else
+	{
+		ui.label_22->setText("load UTNetServiceUtil.dll error: " + dllLib_1.errorString()+ dllLib_2.errorString() + dllLib_3.errorString());
+	}
+	typedef bool(*SasaFunc)(int, int, float, int, int, int, int, int);
+	SasaFunc sasa = (SasaFunc)dllLib_1.resolve("sasa");
+
+	if (sasa) 
+	{
+		qDebug() << "Could  locate the function";
+		while (!sasa(0, 1, 5, 5, 1, 20480, 0, 10))
+		{
+			qDebug() << "aaaaa";
+			Sleep(100);
+		}
+	}
+	qDebug() << "加载成功";
+	//dllLib_1.unload();
+}
+
+
+
+//CAD加载部分
+void Matlab_control_show::BtnReadDXF_clicked()
+{
+	QString file = "C:/Users/yqh/Desktop/9.dxf";
+	DxfReader dxfReader(file);
+	QPen pen;
+	pen.setColor(Qt::yellow);
+	pen.setWidth(0);
+	for (auto d : dxfReader.dxfLines) {
+		QLineF line(d.x1 - XOffset, YOffset - d.y1, d.x2 - XOffset, YOffset - d.y2);
+		dxfLines << line;
+		QGraphicsLineItem *lineItem = new QGraphicsLineItem(line);
+		pen.setCosmetic(true);
+		lineItem->setPen(pen);
+		Scene->addItem(lineItem);
+	}
+	pen.setColor(Qt::green);
+	pen.setWidth(0);
+	for (auto d : dxfReader.dxfArc) {
+		// Calculate start and span angles for QPainterPath::arcTo in degrees
+		double startAngle = d.angle1;
+		double spanAngle = -(d.angle2 - d.angle1);
+		qDebug() << d.angle1 << " " << d.angle2 << " " << startAngle << " " << spanAngle;
+		// Calculate the bounding rectangle for the arc
+		QRectF rect((d.cx - d.radius - XOffset), (YOffset - d.cy - d.radius), 2 * d.radius, 2 * d.radius);
+
+		QPainterPath path;
+		qreal startX = d.cx + cos(abs(d.angle1)*M_PI / 180)*d.radius - XOffset;
+		qreal startY = YOffset - d.cy - sin(abs(d.angle1)*M_PI / 180)*d.radius;
+		path.moveTo(startX, startY);
+
+		path.arcTo(rect, startAngle, -spanAngle);
+		QGraphicsPathItem *pathItem = new QGraphicsPathItem(path);
+		pen.setCosmetic(true);
+		pathItem->setPen(pen);
+		Scene->addItem(pathItem);
+	}
+}
+
+void Matlab_control_show::XOffset_editingFinished()
+{
+	XOffset = ui.XOffset->text().toDouble();
+}
+
+void Matlab_control_show::YOffset_editingFinished()
+{
+	YOffset = ui.YOffset->text().toDouble();
+}
+
+void Matlab_control_show::Zoom_editingFinished()
+{
+	ZoomDelta = ui.Zoom->text().toDouble();
+	qreal factor = View->transform().scale(static_cast<qreal>(ZoomDelta), static_cast<qreal>(ZoomDelta)).mapRect(QRectF(0, 0, 1, 1)).width();
+	if (factor < 0.07 || factor > 100)
+		return;
+	View->scale(ZoomDelta, ZoomDelta);
+}
+
+void Matlab_control_show::EditXCenter_editingFinished()
+{
+	XCenter = ui.EditXCenter->text().toDouble();
+	View->centerOn(XCenter, YCenter);
+}
+
+void Matlab_control_show::EditYCenter_editingFinished()
+{
+	YCenter = ui.EditYCenter->text().toDouble();
+	View->centerOn(XCenter, YCenter);
+}
+
+void Matlab_control_show::DWF_pushButton_clicked()
+{
+#if 0
+	qreal x = 20404614;
+	qreal y = 3918540;
+	QGraphicsEllipseItem* Ellipse = new QGraphicsEllipseItem;
+	Ellipse->setRect(x - XOffset, y - YOffset, 30, 30);
+	Ellipse->setPen(QColor(Qt::white));
+	Ellipse->setBrush(QBrush(QColor(Qt::red)));
+	Ellipse->setFlags(QGraphicsItem::ItemIsSelectable);
+	Scene->addItem(Ellipse);
+	View->centerOn(x - XOffset, y - YOffset);
+#endif
+	/*
+	JTextItem *textItem = new JTextItem("Hello World");
+	textItem->setX(0);
+	textItem->setY(0);
+	textItem->setDefaultTextColor(Qt::white);
+	textItem->setScale(0.5);
+	textItem->setCacheMode(QGraphicsItem::ItemCoordinateCache);
+	textItem->setFlag(QGraphicsItem::ItemClipsToShape);
+	Scene->addItem(textItem);
+	View->centerOn(0, 0);
+	*/
+
+	QPen pen;
+	pen.setWidth(0);
+	pen.setColor(QColor(212, 205, 34));
+	QPolygonF poly;
+	poly << QPointF(10, 10) << QPointF(100, 10) << QPointF(100, 100) << QPointF(20, 20);
+	for (auto d = poly.begin(); d != poly.end();) {
+		auto p1 = *d++;
+		if (d == poly.end())
+			continue;
+		auto p2 = *d;
+		QGraphicsLineItem *lineItem = new QGraphicsLineItem(QLineF(p1, p2));
+		pen.setCosmetic(true);
+		lineItem->setPen(pen);
+		Scene->addItem(lineItem);
+
+		//        QGraphicsPolygonItem *item = new QGraphicsPolygonItem(poly);
+		//        Scene->addItem(item);
+		//        item->setPen(pen);
+	}
+	View->centerOn(0, 0);
+}
+
+void Matlab_control_show::DWF_pushButton_2_clicked()
+{
+#if 1
+	qreal x = 20404614;
+	qreal y = 3918540;
+	// x - XOffset - 30, y - YOffset - 30, x - XOffset + 30, y - YOffset + 30
+	QRectF Rect(x - XOffset, y - YOffset, 5, 5);
+	QList<QGraphicsItem *> itemList = Scene->items(Rect);
+#else
+	QList<QGraphicsItem *> itemList = Scene->selectedItems();
+#endif
+	for (auto i = 0; i < itemList.size(); i++) {
+		Scene->removeItem(itemList[i]);
+		delete itemList[i];
+	}
+	qDebug() << qVersion();
+}
+
+
+

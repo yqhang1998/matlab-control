@@ -6,6 +6,18 @@ QT_CHARTS_USE_NAMESPACE
 
 #include "ui_Matlab_control_show.h"
 
+
+//加载cad图
+#include "dl_dxf.h"
+#include "dl_creationadapter.h"
+#include "interactiveview.h"
+#include "dxfreader.h"
+#include "jlineitem.h"
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QGraphicsItem>
+#include <QSpacerItem>
+#include <QLineEdit>
 //#include <vtkSmartPointer.h>
 //#include <vtkSTLReader.h>
 //#include <vtkPolyDataMapper.h>
@@ -68,8 +80,13 @@ QT_CHARTS_USE_NAMESPACE
 #include <QTcpServer>
 #include <vector>
 #include <iostream>
+#include <QLibrary>
+
+
+
 #define _USE_MATH_DEFINES 
 
+class drawThread;
 
 class Matlab_control_show : public QMainWindow
 {
@@ -94,10 +111,11 @@ private slots:
 	void pushButtonSelDone_clicked();
 	//处理鼠标点击
 	void onPointPicked(double* pos);
+	//dll加载
+	void dllload();
 
 
-
-private:
+public:
 	Ui::Matlab_control_showClass ui;
 	void initVTK(const QString &modelname);
 
@@ -203,6 +221,28 @@ private slots:
 	//喇叭口工件路径规划画线
 	void drawcurve();
 
+
+//CAd加载部分
+public:
+	QGraphicsScene* Scene;
+	InteractiveView* View;
+	qreal XOffset;
+	qreal YOffset;
+	qreal ZoomDelta;
+	// 中心点
+	qreal XCenter;
+	qreal YCenter;
+	QVector<QLineF> dxfLines;
+	QList<DL_TextData> dxfText;
+private slots:
+	void BtnReadDXF_clicked();
+	void XOffset_editingFinished();
+	void YOffset_editingFinished();
+	void Zoom_editingFinished();
+	void EditXCenter_editingFinished();
+	void EditYCenter_editingFinished();
+	void DWF_pushButton_clicked();
+	void DWF_pushButton_2_clicked();
 };
 
 //vtk部分
@@ -247,3 +287,5 @@ public:
 	double pickedPoint[3];
 	PointPickedSignal* signal; // this will emit the pointPicked signal when a point is picked
 };
+
+
