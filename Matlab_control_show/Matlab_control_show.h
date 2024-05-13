@@ -7,6 +7,10 @@ QT_CHARTS_USE_NAMESPACE
 #include "ui_Matlab_control_show.h"
 
 
+#include <QtSerialPort/QSerialPort>
+#include <QtSerialPort/QSerialPortInfo>
+
+
 //加载cad图
 #include "dl_dxf.h"
 #include "dl_creationadapter.h"
@@ -82,6 +86,7 @@ QT_CHARTS_USE_NAMESPACE
 #include <iostream>
 #include <QLibrary>
 
+#include <QDateTime>
 
 
 #define _USE_MATH_DEFINES 
@@ -243,6 +248,26 @@ private slots:
 	void EditYCenter_editingFinished();
 	void DWF_pushButton_clicked();
 	void DWF_pushButton_2_clicked();
+
+//时间显示
+private:
+	QTimer *timer_datetime;
+	QDateTime dt;
+	QLabel *currentTimeLabel;
+private slots:
+	void do_timer_timeout();
+
+
+//串口
+private:
+	QSerialPort *comPort;
+private slots:
+	void do_serialport_close_clicked();//关闭串口
+	void do_serialport_clicked();//打开配置串口
+	void rece_slots();//接收槽函数
+	void do_send_clicked();//发送
+	void do_start();//打开喷水
+	void do_close();//关闭喷水
 };
 
 //vtk部分

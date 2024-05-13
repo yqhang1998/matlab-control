@@ -1,4 +1,5 @@
 <RCC>
-    <qresource prefix="Matlab_control_show_show">
+    <qresource prefix="/Matlab_control_show_show">
+        <file>stop1.jpg</file>
     </qresource>
 </RCC>

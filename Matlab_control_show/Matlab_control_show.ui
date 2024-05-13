@@ -156,7 +156,7 @@
      <item>
       <widget class="QPushButton" name="btnStartAndStop">
        <property name="text">
-        <string>启动定时器</string>
+        <string>START</string>
        </property>
       </widget>
      </item>
@@ -718,6 +718,352 @@
      <string>Delete</string>
     </property>
    </widget>
+   <widget class="QLabel" name="label_28">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>131</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>采集卡连接</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_29">
+    <property name="geometry">
+     <rect>
+      <x>1430</x>
+      <y>300</y>
+      <width>141</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>cad文件读取</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_30">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>670</y>
+      <width>131</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>机械臂连接</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>990</y>
+      <width>411</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_18">
+     <item>
+      <widget class="QPushButton" name="pushButton_6">
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_7">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QLabel" name="label_31">
+    <property name="geometry">
+     <rect>
+      <x>1610</x>
+      <y>70</y>
+      <width>101</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>串口号</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_32">
+    <property name="geometry">
+     <rect>
+      <x>1610</x>
+      <y>110</y>
+      <width>101</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>波特率</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_33">
+    <property name="geometry">
+     <rect>
+      <x>1610</x>
+      <y>150</y>
+      <width>101</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>数据位</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_34">
+    <property name="geometry">
+     <rect>
+      <x>1610</x>
+      <y>190</y>
+      <width>101</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>停止位</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_8">
+    <property name="geometry">
+     <rect>
+      <x>1580</x>
+      <y>280</y>
+      <width>128</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>打开串口</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textEdit">
+    <property name="geometry">
+     <rect>
+      <x>1840</x>
+      <y>60</y>
+      <width>141</width>
+      <height>131</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_18">
+    <property name="geometry">
+     <rect>
+      <x>1740</x>
+      <y>280</y>
+      <width>113</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_9">
+    <property name="geometry">
+     <rect>
+      <x>1870</x>
+      <y>280</y>
+      <width>128</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>发送数据</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_serial">
+    <property name="geometry">
+     <rect>
+      <x>1710</x>
+      <y>60</y>
+      <width>81</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string/>
+     </property>
+    </item>
+   </widget>
+   <widget class="QComboBox" name="comboBox_Buad">
+    <property name="geometry">
+     <rect>
+      <x>1710</x>
+      <y>100</y>
+      <width>81</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string/>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>115200</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>19200</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>9600</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QComboBox" name="comboBox_DataBit">
+    <property name="geometry">
+     <rect>
+      <x>1710</x>
+      <y>140</y>
+      <width>81</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string/>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>8</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QComboBox" name="comboBox_StopBit">
+    <property name="geometry">
+     <rect>
+      <x>1710</x>
+      <y>190</y>
+      <width>81</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string/>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>1</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>1.5</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>2</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label_35">
+    <property name="geometry">
+     <rect>
+      <x>1580</x>
+      <y>230</y>
+      <width>131</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>奇偶校验位</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_Parity">
+    <property name="geometry">
+     <rect>
+      <x>1710</x>
+      <y>230</y>
+      <width>81</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string/>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>NONE</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QPushButton" name="pushButton_10">
+    <property name="geometry">
+     <rect>
+      <x>1580</x>
+      <y>340</y>
+      <width>128</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>start</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_11">
+    <property name="geometry">
+     <rect>
+      <x>1750</x>
+      <y>340</y>
+      <width>128</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>stop</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_12">
+    <property name="geometry">
+     <rect>
+      <x>1590</x>
+      <y>390</y>
+      <width>128</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>关闭串口</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_status">
+    <property name="geometry">
+     <rect>
+      <x>1870</x>
+      <y>230</y>
+      <width>20</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -728,6 +1074,12 @@
      <height>23</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menu_D">
+    <property name="title">
+     <string>文件(&amp;D)</string>
+    </property>
+   </widget>
+   <addaction name="menu_D"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -898,6 +1250,86 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pushButton_9</sender>
+   <signal>clicked()</signal>
+   <receiver>Matlab_control_showClass</receiver>
+   <slot>do_send_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1919</x>
+     <y>332</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1855</x>
+     <y>416</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_8</sender>
+   <signal>clicked()</signal>
+   <receiver>Matlab_control_showClass</receiver>
+   <slot>do_serialport_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1662</x>
+     <y>334</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1641</x>
+     <y>499</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_10</sender>
+   <signal>clicked()</signal>
+   <receiver>Matlab_control_showClass</receiver>
+   <slot>do_start()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1642</x>
+     <y>393</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1707</x>
+     <y>588</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_11</sender>
+   <signal>clicked()</signal>
+   <receiver>Matlab_control_showClass</receiver>
+   <slot>do_close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1816</x>
+     <y>386</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1908</x>
+     <y>536</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_12</sender>
+   <signal>clicked()</signal>
+   <receiver>Matlab_control_showClass</receiver>
+   <slot>do_serialport_close_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1606</x>
+     <y>447</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1579</x>
+     <y>642</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>pushButtonSelect_clicked()</slot>
@@ -916,5 +1348,10 @@
   <slot>dllload()</slot>
   <slot>slot3()</slot>
   <slot>BtnReadDXF_clicked()</slot>
+  <slot>do_send_clicked()</slot>
+  <slot>do_serialport_clicked()</slot>
+  <slot>do_start()</slot>
+  <slot>do_close()</slot>
+  <slot>do_serialport_close_clicked()</slot>
  </slots>
 </ui>

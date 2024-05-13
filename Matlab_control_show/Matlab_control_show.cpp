@@ -20,6 +20,32 @@ Matlab_control_show::Matlab_control_show(QWidget *parent)
 	ui.setupUi(this);
 	// 配置 VTK 的初始设置，这个函数用来显示stl模型
 	
+	
+	//串口
+	comPort = new QSerialPort;
+	//串口状态灯
+	ui.label_status->setAutoFillBackground(true); // 允许修改背景色
+	QPalette palette = ui.label_status->palette();
+	palette.setColor(QPalette::Window, Qt::red);
+	ui.label_status->setPalette(palette);
+	//查找可用的串口号
+	QList<QSerialPortInfo> list = QSerialPortInfo::availablePorts();
+	for (int i = 0; i < list.size(); ++i)
+	{
+		ui.comboBox_serial->addItem(list.at(i).portName());
+	}
+	connect(comPort,SIGNAL(readyRead()),this,SLOT(rece_slots()));
+
+	//时间显示
+	currentTimeLabel = new QLabel;
+	ui.statusBar->addWidget(currentTimeLabel); //在状态栏添加此控件
+	timer_datetime = new QTimer(this);
+	timer_datetime->start(1000);
+	connect(timer_datetime, SIGNAL(timeout()), this, SLOT(do_timer_timeout()));
+
+
+
+
 
 	//initVTK("trumpet");
 	//combobox
@@ -153,6 +179,27 @@ Matlab_control_show::Matlab_control_show(QWidget *parent)
 	ui.YOffset->setText(QString::number(YOffset, 'f', 3));
 	ui.Zoom->setText(QString::number(ZoomDelta, 'f', 3));
 
+	//stop按钮设置
+	QIcon icon_stop("C:/Users/yqh/Desktop/stop.png");
+
+	// 设置按钮的大小
+	ui.pushButton_6->setFixedSize(QSize(100, 100));
+	// 设置图标的大小
+	ui.pushButton_6->setIcon(icon_stop);
+	ui.pushButton_6->setIconSize(QSize(100, 100));
+	ui.pushButton_6->setIcon(QIcon("C:/Users/yqh/Desktop/stop.png"));
+
+	//home按钮设置
+	QIcon icon_home("C:/Users/yqh/Desktop/home.png");
+
+	// 设置按钮的大小
+	ui.pushButton_7->setFixedSize(QSize(100, 100));
+
+	// 设置图标的大小
+	ui.pushButton_7->setIcon(icon_home);
+	ui.pushButton_7->setIconSize(QSize(100, 100));
+	ui.pushButton_7->setIcon(QIcon("C:/Users/yqh/Desktop/home.png"));
+	
 }
 
 Matlab_control_show::~Matlab_control_show()
@@ -532,7 +579,6 @@ void Matlab_control_show::pushButton_clicked()
 	}
 
 	//执行到这表明服务器启动成功，并对客户端连接进行监听，如果有客户端向服务器发来连接请求，那么该服务器就会自动发射一个newConnection信号
-	//我们可以将信号连接到对应的槽函数中处理相关逻辑
 	connect(server, &QTcpServer::newConnection, this, &Matlab_control_show::newConnection_slot);
 }
 
@@ -908,8 +954,7 @@ void Matlab_control_show::drawcurve()
 //加载dll库
 void Matlab_control_show::dllload()
 {
-		//要加载两个dll库
-    //C: / Users / yqh / Desktop /
+	//要加载两个dll库
 	QString path_1 = "c.dll";
 	QString path_2 = "UTNetServiceUtil.dll";
 	QString path_3 = "UTNetUtil.dll";
@@ -1083,3 +1128,179 @@ void Matlab_control_show::DWF_pushButton_2_clicked()
 
 
 
+//timer
+void Matlab_control_show::do_timer_timeout()
+{
+	dt = QDateTime::currentDateTime();
+	QString timestr = dt.toString("yyyy-MM-dd hh:mm:ss"); //设置显示的格式
+	currentTimeLabel->setText(timestr); //设置label的文本内容为时间
+}
+
+//serialport打开配置
+void Matlab_control_show::do_serialport_clicked()
+{
+	//选择要打开的串口
+	comPort->setPort(QSerialPortInfo(ui.comboBox_serial->currentText()));
+	//设置波特率
+	if (ui.comboBox_Buad->currentText()=="115200")
+	{
+		comPort->setBaudRate(QSerialPort::Baud115200);
+	}
+	else if (ui.comboBox_Buad->currentText() == "19200")
+	{
+		comPort->setBaudRate(QSerialPort::Baud19200);
+	}
+	else if (ui.comboBox_Buad->currentText() == "9600")
+	{
+		comPort->setBaudRate(QSerialPort::Baud9600);
+	}
+	//设置数据位
+	if (ui.comboBox_DataBit->currentText() == "8")
+	{
+		comPort->setDataBits(QSerialPort::Data8);
+	}
+	//设置校验
+	if (ui.comboBox_Parity->currentText() == "NONE")
+	{
+		comPort->setParity(QSerialPort::NoParity);
+	}
+	//设置停止位
+	if (ui.comboBox_StopBit->currentText() == "1")
+	{
+		comPort->setStopBits(QSerialPort::OneStop);
+	}
+	else if (ui.comboBox_StopBit->currentText() == "1.5")
+	{
+		comPort->setStopBits(QSerialPort::OneAndHalfStop);
+	}
+	else if (ui.comboBox_StopBit->currentText() == "2")
+	{
+		comPort->setStopBits(QSerialPort::TwoStop);
+	}
+	//打开串口
+	if (comPort->isOpen())
+	{
+		QMessageBox::warning(this,"错误","打开串口出错！！串口已打开");
+		comPort->close();
+		ui.label_status->setAutoFillBackground(true); 
+		QPalette palette = ui.label_status->palette();
+		palette.setColor(QPalette::Window, Qt::red);
+		ui.label_status->setPalette(palette);
+	}
+	bool s = comPort->open(QIODevice::ReadWrite);
+	ui.label_status->setAutoFillBackground(true);
+	QPalette palette = ui.label_status->palette();
+	palette.setColor(QPalette::Window, Qt::green);
+	ui.label_status->setPalette(palette);
+	if (s == true)
+	{
+		qDebug() << "com open success";
+	}
+	else
+	{
+		qDebug() << "com open failed!!!!!!";
+	}
+}
+
+
+void Matlab_control_show::do_serialport_close_clicked()
+{
+	if (comPort->isOpen())
+	{
+		comPort->close();
+		ui.label_status->setAutoFillBackground(true); 
+		QPalette palette = ui.label_status->palette();
+		palette.setColor(QPalette::Window, Qt::red);
+		ui.label_status->setPalette(palette);
+	}
+}
+
+
+void Matlab_control_show::rece_slots()
+{
+	//读数据
+	QByteArray data = comPort->readAll();
+	//显示
+	ui.textEdit->append(data);
+}
+
+void Matlab_control_show::do_send_clicked()
+{
+	if (comPort->isOpen())
+	{
+		QString seddata = ui.lineEdit_18->text();
+		QByteArray data = seddata.toUtf8();
+		int retval = comPort->write(data);
+		if (retval < 0)
+		{
+			qDebug() << "send failed!!!";
+		}
+		else
+		{
+			qDebug() << "success";
+			qDebug() << retval;
+		}
+	}
+	else
+		qDebug() << "serial open failed!";
+}
+
+
+void Matlab_control_show::do_start()
+{
+	//vector<uint8_t> instructions_DO1_open = { 0x01, 0x05, 0x00, 0x64, 0x00, 0x00, 0x8C, 0x15 };
+	//sendHex(hSerial, instructions_DO1_open);
+	//DWORD bytesRead;
+	//uint8_t received[8];
+	//ReadFile(hSerial, received, sizeof(received), &bytesRead, nullptr);
+	QVector<uint8_t> instructions_DO1_open= { 0x01, 0x05, 0x00, 0x64, 0x00, 0x00, 0x8C, 0x15 };
+	if (comPort->isOpen())
+	{
+		QString result;
+		for (uint8_t byte : instructions_DO1_open) {
+			result += QString::number(byte, 16).rightJustified(2, '0') + " ";
+		}
+		result = result.trimmed(); //移除最后一个空格
+		QByteArray data = result.toUtf8();
+		int retval = comPort->write(data);
+		if (retval < 0)
+		{
+			qDebug() << "send start failed!!!";
+		}
+		else
+		{
+			qDebug() << "success";
+			qDebug() << retval;
+		}
+	}
+	else
+		qDebug() << "serial open failed!";
+
+}
+
+void Matlab_control_show::do_close()
+{
+	QVector<uint8_t> instructions_DO1_close = { 0x01, 0x05, 0x00, 0x64, 0xFF, 0x00, 0xCD, 0xE5 };
+	if (comPort->isOpen())
+	{
+		QString result;
+		for (uint8_t byte : instructions_DO1_close) {
+			result += QString::number(byte, 16).rightJustified(2, '0') + " ";
+		}
+		result = result.trimmed(); //移除最后一个空格
+		QByteArray data = result.toUtf8();
+		int retval = comPort->write(data);
+		if (retval < 0)
+		{
+			qDebug() << "send close failed!!!";
+		}
+		else
+		{
+			qDebug() << "success";
+			qDebug() << retval;
+		}
+	}
+	else
+		qDebug() << "serial open failed!";
+
+}
